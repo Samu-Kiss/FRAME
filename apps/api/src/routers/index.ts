@@ -6,6 +6,7 @@ import { personsRouter } from "./persons.js"
 import { tasksRouter } from "./tasks.js"
 import { locationsRouter } from "./locations.js"
 import { propsRouter } from "./props.js"
+import { stylingsRouter } from "./stylings.js"
 import { equipmentRouter } from "./equipment.js"
 import { productionDayRouter } from "./productionDay.js"
 import { changelogRouter } from "./changelog.js"
@@ -38,6 +39,7 @@ export const appRouter = router({
   tasks: tasksRouter,
   locations: locationsRouter,
   props: propsRouter,
+  stylings: stylingsRouter,
   equipment: equipmentRouter,
   productionDay: productionDayRouter,
   changelog: changelogRouter,
