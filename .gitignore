@@ -1,0 +1,32 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+dist/
+.turbo/
+out/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env*.local
+
+# prisma
+packages/db/generated/
+
+# supabase local
+supabase/.branches/
+supabase/.temp/
+
+# misc
+.DS_Store
+*.log
+coverage/
+.data/
+
+.claude/
+
+.codegraph/
