@@ -2,6 +2,8 @@ import { renderToBuffer } from "@react-pdf/renderer"
 import { prisma } from "@frame/db"
 import { CallSheetDocument } from "./pdf/CallSheet.js"
 import { ShotListDocument } from "./pdf/ShotList.js"
+import { ScriptDocument, scriptDocToBlocks } from "./pdf/Script.js"
+import { ProductionScheduleDocument } from "./pdf/ProductionSchedule.js"
 import { toCsv } from "./csv.js"
 import { richTextToPlain } from "./richtext.js"
 
@@ -85,6 +87,39 @@ export async function generateShotListPdf(projectId: string): Promise<ExportFile
   const { project, acts } = await loadShotListTree(projectId)
   const buffer = await renderToBuffer(<ShotListDocument project={project} acts={acts} />)
   return { filename: "shot-list.pdf", contentType: "application/pdf", body: buffer }
+}
+
+export async function generateScriptPdf(projectId: string): Promise<ExportFile> {
+  const project = await prisma.project.findUniqueOrThrow({
+    where: { id: projectId },
+    select: { title: true, script: { select: { content: true } } },
+  })
+  const blocks = scriptDocToBlocks(project.script?.content)
+  const buffer = await renderToBuffer(<ScriptDocument title={project.title} blocks={blocks} />)
+  return { filename: "script.pdf", contentType: "application/pdf", body: buffer }
+}
+
+export async function generateProductionSchedule(projectId: string): Promise<ExportFile> {
+  const project = await prisma.project.findUniqueOrThrow({
+    where: { id: projectId },
+    select: { title: true, client: true },
+  })
+  const days = await prisma.productionDay.findMany({
+    where: { projectId },
+    orderBy: { date: "asc" },
+    include: {
+      locations: { include: { location: { select: { name: true } } } },
+      scheduleBlocks: {
+        orderBy: [{ startTime: "asc" }, { order: "asc" }],
+        include: {
+          location: { select: { name: true } },
+          shots: { include: { shot: { select: { shotNumber: true } } } },
+        },
+      },
+    },
+  })
+  const buffer = await renderToBuffer(<ProductionScheduleDocument project={project} days={days} />)
+  return { filename: "production-schedule.pdf", contentType: "application/pdf", body: buffer }
 }
 
 export async function generateShotListCsv(projectId: string): Promise<ExportFile> {

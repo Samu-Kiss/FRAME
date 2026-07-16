@@ -3,7 +3,13 @@ import { exportRequestSchema } from "@frame/validators"
 import { router, projectProcedure, requirePermission } from "../trpc.js"
 import { exportAllowed } from "../config/plans.js"
 import { uploadExport } from "../lib/storage.js"
-import { generateCallSheet, generateShotListPdf, generateShotListCsv, type ExportFile } from "../services/pdfExport.js"
+import {
+  generateCallSheet, generateShotListPdf, generateShotListCsv, generateScriptPdf,
+  generateProductionSchedule,
+  type ExportFile,
+} from "../services/pdfExport.js"
+import { resolveSlate } from "../services/slate.js"
+import { renderSlatePDF, renderSlatePNG } from "../services/slateRender.js"
 
 export const exportsRouter = router({
   request: requirePermission("canExport")
@@ -48,6 +54,26 @@ export const exportsRouter = router({
               input.format === "csv"
                 ? await generateShotListCsv(input.projectId)
                 : await generateShotListPdf(input.projectId)
+            break
+          }
+          case "SCRIPT": {
+            file = await generateScriptPdf(input.projectId)
+            break
+          }
+          case "PRODUCTION_SCHEDULE": {
+            file = await generateProductionSchedule(input.projectId)
+            break
+          }
+          case "SLATE_PDF":
+          case "SLATE_PNG": {
+            if (!input.entityId) {
+              throw new TRPCError({ code: "BAD_REQUEST", message: "ENTITY_REQUIRED:shot" })
+            }
+            const { fields, shotNumber } = await resolveSlate(input.projectId, input.entityId)
+            file =
+              input.type === "SLATE_PNG"
+                ? await renderSlatePNG(fields, shotNumber)
+                : await renderSlatePDF(fields, shotNumber)
             break
           }
           default:
