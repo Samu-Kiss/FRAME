@@ -1,0 +1,47 @@
+import { router, authedProcedure } from "../trpc.js"
+import { PLAN_LIMITS } from "../config/plans.js"
+import { projectRouter } from "./project.js"
+import { structureRouter } from "./structure.js"
+import { personsRouter } from "./persons.js"
+import { tasksRouter } from "./tasks.js"
+import { locationsRouter } from "./locations.js"
+import { propsRouter } from "./props.js"
+import { equipmentRouter } from "./equipment.js"
+import { productionDayRouter } from "./productionDay.js"
+import { changelogRouter } from "./changelog.js"
+import { exportsRouter } from "./exports.js"
+
+export const appRouter = router({
+  me: authedProcedure.query(({ ctx }) => {
+    const limits = PLAN_LIMITS[ctx.plan]
+    return {
+      id: ctx.dbUser.id,
+      email: ctx.dbUser.email,
+      name: ctx.dbUser.name,
+      plan: ctx.plan,
+      limits: {
+        // Infinity is not JSON-serializable through superjson? It is — but
+        // send a plain shape the UI can render either way.
+        maxActiveProjects: limits.maxActiveProjects,
+        maxCollaborators: limits.maxCollaborators,
+        exportsPerDay: limits.exportsPerDay,
+        granularPermissions: limits.granularPermissions,
+        slateGenerator: limits.slateGenerator,
+        advancedExports: limits.advancedExports,
+        exports: limits.exports,
+      },
+    }
+  }),
+  project: projectRouter,
+  structure: structureRouter,
+  persons: personsRouter,
+  tasks: tasksRouter,
+  locations: locationsRouter,
+  props: propsRouter,
+  equipment: equipmentRouter,
+  productionDay: productionDayRouter,
+  changelog: changelogRouter,
+  exports: exportsRouter,
+})
+
+export type AppRouter = typeof appRouter

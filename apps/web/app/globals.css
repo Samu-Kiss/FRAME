@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+/* SMPTE dark design tokens (§1.7, palette refined in the design mockups) */
+@theme {
+  --color-bg: #0d0d0d;
+  --color-bg-deep: #090909;
+  --color-surface: #1a1a1a;
+  --color-surface-2: #141414;
+  --color-border: #2e2e2e;
+  --color-border-dim: #1e1e1e;
+  --color-text: #f0f0f0;
+  --color-muted: #6b6b6b;
+  --color-faint: #3a3a3a;
+
+  --color-smpte-white: #f0f0f0;
+  --color-smpte-yellow: #efc000;
+  --color-smpte-cyan: #00d4de;
+  --color-smpte-green: #00c853;
+  --color-smpte-magenta: #cc00aa;
+  --color-smpte-red: #ff3530;
+  --color-smpte-blue: #2860ff;
+
+  --font-display: var(--font-syne), sans-serif;
+  --font-mono: var(--font-dm-mono), monospace;
+  --font-sans: var(--font-dm-sans), sans-serif;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-smpte-cyan) 30%, transparent);
+}
+
+/* thin scrollbars that match the set */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}

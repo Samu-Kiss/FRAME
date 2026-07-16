@@ -1,0 +1,36 @@
+{
+  "name": "@frame/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "start": "tsx --env-file=.env src/server.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@frame/db": "workspace:*",
+    "@frame/validators": "workspace:*",
+    "@hono/node-server": "^1.14.0",
+    "@hono/trpc-server": "^0.4.0",
+    "@react-pdf/renderer": "^4.3.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "@trpc/server": "^11.1.0",
+    "hono": "^4.7.0",
+    "react": "^19.1.0",
+    "superjson": "^2.2.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@frame/tsconfig": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.1.0"
+  }
+}
