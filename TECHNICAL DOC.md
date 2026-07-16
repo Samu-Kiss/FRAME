@@ -35,7 +35,11 @@ Contradicciones y vacíos detectados en la v0.2 al iniciar la implementación, c
 | 12 | §1.7 paleta SMPTE pura (`#FFFF00`…) vs mockups con paleta ajustada | **Paleta de los mockups** (`#EFC000`, `#00D4DE`, …) — mejor contraste. §1.7 corregido |
 | 13 | Doc especificaba Next.js 14 | **Next.js 15 App Router** (estable actual) |
 
-**Alcance implementado (núcleo MVP):** monorepo Turborepo/pnpm, schema Prisma completo, API Hono+tRPC (auth Supabase, permisos, plan limits, changelog automático), UI de Dashboard/Shotlist/Personas+Tasks/Locaciones/Props/Equipment/Production Days/Changelog/Settings, exports Call Sheet PDF y Shot List PDF/CSV. **Diferido:** guión TipTap, moodboard, stylings UI, slate generator, BullMQ+Redis, realtime, RLS, rate limiting.
+**Alcance implementado:**
+- *v0.1 (núcleo MVP):* monorepo Turborepo/pnpm, schema Prisma completo, API Hono+tRPC (auth Supabase, permisos, plan limits, changelog automático), UI de Dashboard/Shotlist/Personas+Tasks (multi-asignado)/Locaciones/Props/Equipment/Production Days/Changelog/Settings, exports Call Sheet PDF y Shot List PDF/CSV.
+- *v0.2 (MVP 1.0 completo):* guión TipTap con export PDF formato industria, Stylings UI, Moodboard (proyecto+escena, freeform/grid, upload de imágenes), Slate Generator (preview en vivo, PDF + PNG 1920×1080 vía Chrome headless), export de Production Schedule.
+
+**Diferido:** BullMQ+Redis (los exports son síncronos tras el seam de `pdfExport`), Supabase Realtime, RLS, rate limiting, comentarios/notificaciones (MVP+).
 
 ---
 
