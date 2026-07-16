@@ -1,0 +1,10 @@
+{
+  "extends": "@frame/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["src"]
+}
