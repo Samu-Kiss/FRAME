@@ -2,6 +2,11 @@ import { supabaseAdmin } from "./supabase.js"
 import { env } from "../env.js"
 
 let bucketReady = false
+let publicBucketReady = false
+
+// Private bucket: generated exports (signed URLs). Public bucket: images
+// that render in <img> tags (moodboard, references) — unguessable paths.
+const PUBLIC_BUCKET = `${env.STORAGE_BUCKET}-public`
 
 async function ensureBucket() {
   if (bucketReady) return
@@ -10,6 +15,40 @@ async function ensureBucket() {
     await supabaseAdmin.storage.createBucket(env.STORAGE_BUCKET, { public: false })
   }
   bucketReady = true
+}
+
+async function ensurePublicBucket() {
+  if (publicBucketReady) return
+  const { data } = await supabaseAdmin.storage.getBucket(PUBLIC_BUCKET)
+  if (!data) {
+    await supabaseAdmin.storage.createBucket(PUBLIC_BUCKET, {
+      public: true,
+      fileSizeLimit: 20 * 1024 * 1024,
+      allowedMimeTypes: ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"],
+    })
+  }
+  publicBucketReady = true
+}
+
+/** Uploads an image to the public bucket and returns its permanent URL. */
+export async function uploadPublicImage(params: {
+  projectId: string
+  scope: string // e.g. "moodboard"
+  filename: string
+  body: Buffer | Uint8Array
+  contentType: string
+}): Promise<{ storagePath: string; publicUrl: string }> {
+  await ensurePublicBucket()
+  const safeName = params.filename.replace(/[^\w.\-]+/g, "_").slice(-80)
+  const storagePath = `projects/${params.projectId}/${params.scope}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${safeName}`
+
+  const { error } = await supabaseAdmin.storage
+    .from(PUBLIC_BUCKET)
+    .upload(storagePath, params.body, { contentType: params.contentType })
+  if (error) throw error
+
+  const { data } = supabaseAdmin.storage.from(PUBLIC_BUCKET).getPublicUrl(storagePath)
+  return { storagePath, publicUrl: data.publicUrl }
 }
 
 /**
