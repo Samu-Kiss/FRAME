@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>FRAME — Product Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #090909; color: #F0F0F0; overflow-x: hidden; }
+  .fd { font-family: 'Syne', sans-serif; }
+  .fm { font-family: 'DM Mono', monospace; }
+  .fb { font-family: 'DM Sans', sans-serif; }
+  section { padding: 80px 72px; border-bottom: 1px solid #141414; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 36px; color: #E8E8E8; letter-spacing: -0.01em; margin-bottom: 12px; line-height: 1.15; }
+  .lead { font-family: 'DM Sans', sans-serif; font-size: 16px; color: #888; margin-bottom: 48px; line-height: 1.7; max-width: 520px; }
+</style>
+</head>
+<body>
+
+<div id="bar-top"></div>
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<section id="hero" style="padding: 88px 72px 80px;">
+  <div class="wrap">
+    <div id="logo-hero"></div>
+    <div style="margin-top: 48px;">
+      <h1 class="fd" style="font-weight:700; font-size:48px; color:#EBEBEB; letter-spacing:-0.01em; line-height:1.1; margin-bottom:20px;">
+        From concept<br/>to final cut.
+      </h1>
+      <p class="fb" style="font-size:17px; color:#AAA; max-width:520px; line-height:1.75; margin-bottom:32px;">
+        FRAME is a production management web app built for filmmakers who demand precision at every stage — pre-production, shoot day, and post.
+      </p>
+      <div id="hero-tags" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+    </div>
+    <div id="hero-stats" style="margin-top:56px; display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#141414; border-radius:6px; overflow:hidden;"></div>
+    <div style="margin-top:40px;">
+      <div style="background:#0D0D0D; border:1px solid #1C1C1C; border-radius:6px; overflow:hidden;">
+        <div style="padding:10px 16px; border-bottom:1px solid #141414; display:flex; align-items:center; gap:16px;">
+          <div id="logo-mini"></div>
+          <div style="margin-left:auto; display:flex; gap:6px;" id="mini-tabs"></div>
+        </div>
+        <div id="mini-head" style="display:grid; grid-template-columns:64px 40px 80px 1fr 80px 90px; gap:10px; padding:8px 16px; border-bottom:1px solid #0E0E0E;"></div>
+        <div id="mini-rows"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── THE PROBLEM ──────────────────────────────────────── -->
+<section id="problem">
+  <div class="wrap">
+    <div class="slabel" data-color="#FF3530" data-label="The Problem"></div>
+    <h2>Productions shouldn't live<br/>in spreadsheets.</h2>
+    <p class="lead" style="max-width:560px;">
+      Most productions patch together five different tools and call it a workflow. FRAME is the one place where everything is already connected.
+    </p>
+    <div id="problems" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;"></div>
+  </div>
+</section>
+
+<!-- ── MODULES ──────────────────────────────────────────── -->
+<section id="modules">
+  <div class="wrap">
+    <div class="slabel" data-color="#2860FF" data-label="What's Included"></div>
+    <h2>Every module your<br/>production needs.</h2>
+    <p class="lead">
+      12 fully integrated modules. Every entity is relational — a change in one place reflects everywhere it matters.
+    </p>
+    <div id="modules-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:#141414; border-radius:6px; overflow:hidden;"></div>
+  </div>
+</section>
+
+<!-- ── FOR EVERY ROLE ───────────────────────────────────── -->
+<section id="roles">
+  <div class="wrap">
+    <div class="slabel" data-color="#EFC000" data-label="For Every Role"></div>
+    <h2>Built for everyone<br/>on the production.</h2>
+    <p class="lead">
+      Each team member sees what they need. The director sees the full picture. The AD builds the schedule. The DP works the shotlist. Everyone stays aligned.
+    </p>
+    <div id="roles-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px;"></div>
+  </div>
+</section>
+
+<!-- ── PRICING ──────────────────────────────────────────── -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="slabel" data-color="#00C853" data-label="Pricing"></div>
+    <h2>Every production size,<br/>covered.</h2>
+    <p class="lead">
+      Start free for a single project. Upgrade when your production volume demands it — not before.
+    </p>
+    <div id="tiers" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding-top:12px;"></div>
+  </div>
+</section>
+
+<!-- ── DESIGN LANGUAGE ─────────────────────────────────── -->
+<section id="design" style="border-bottom:none;">
+  <div class="wrap">
+    <div class="slabel" data-color="#CC00AA" data-label="Design Language"></div>
+    <h2>SMPTE color bars,<br/>reinterpreted.</h2>
+    <p class="lead" style="margin-bottom:40px;">
+      The seven SMPTE broadcast colors become a semantic system. Every color means something. Nothing is decorative.
+    </p>
+    <div id="design-bar" style="display:flex; gap:0; height:10px; border-radius:3px; overflow:hidden; margin-bottom:32px;"></div>
+    <div id="semantics" style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px;"></div>
+    <div style="margin-top:32px; display:grid; grid-template-columns:repeat(2,1fr); gap:10px;">
+      <div style="background:#0D0D0D; border:1px solid #1C1C1C; border-radius:6px; padding:22px;">
+        <div class="fm" style="font-size:10px; color:#555; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:16px;">Type System</div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="padding-bottom:14px; border-bottom:1px solid #141414;">
+            <div class="fd" style="font-weight:700; font-size:28px; letter-spacing:0.28em; color:#F0F0F0; line-height:1; margin-right:-0.28em;">FRAME</div>
+            <div class="fm" style="font-size:9px; color:#444; margin-top:4px;">Syne 700 · 0.28em — Wordmark</div>
+          </div>
+          <div style="padding-bottom:14px; border-bottom:1px solid #141414;">
+            <div class="fm" style="font-size:12px; color:#AAA; letter-spacing:0.04em;">1A-03 · MCU · 50mm · 08:30</div>
+            <div class="fm" style="font-size:9px; color:#444; margin-top:4px;">DM Mono — Shot data, timecodes, lenses</div>
+          </div>
+          <div>
+            <div class="fb" style="font-size:14px; color:#999; line-height:1.6;">Carlos approaches from behind.</div>
+            <div class="fm" style="font-size:9px; color:#444; margin-top:4px;">DM Sans — Descriptions, body copy</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#0D0D0D; border:1px solid #1C1C1C; border-radius:6px; padding:22px;">
+        <div class="fm" style="font-size:10px; color:#555; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:16px;">Surface Scale</div>
+        <div id="surfaces" style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;"></div>
+        <div class="fm" style="font-size:9px; color:#333; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:6px;">Base</div>
+        <div class="fb" style="font-size:12px; color:#555;">Near-black, not pure black. The set is dark — but detail matters.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────────────── -->
+<div id="footer">
+  <div style="border-top:1px solid #111; padding:24px 72px; display:flex; align-items:center; justify-content:space-between;">
+    <div id="logo-footer"></div>
+    <div style="display:flex; gap:20px; align-items:center;">
+      <span class="fm" style="font-size:9px; color:#2E2E2E; letter-spacing:0.1em;">© 2026 FRAME</span>
+      <span class="fm" style="font-size:9px; color:#2E2E2E; letter-spacing:0.1em;">Built from the technical doc — core MVP implemented</span>
+    </div>
+  </div>
+  <div id="bar-bottom"></div>
+</div>
+
+<script>
+const S = { white:'#F0F0F0', yellow:'#EFC000', cyan:'#00D4DE', green:'#00C853', magenta:'#CC00AA', red:'#FF3530', blue:'#2860FF' }
+const BAR = [S.white, S.yellow, S.cyan, S.green, S.magenta, S.red, S.blue]
+
+function smpteBar(h) {
+  return `<div style="display:flex; height:${h}px; width:100%;">${BAR.map(c => `<div style="flex:1; background:${c}"></div>`).join('')}</div>`
+}
+document.getElementById('bar-top').innerHTML = smpteBar(5)
+document.getElementById('bar-bottom').innerHTML = smpteBar(4)
+document.getElementById('design-bar').innerHTML = BAR.map(c => `<div style="flex:1; background:${c}"></div>`).join('')
+
+function logo(size) {
+  const dot = Math.max(5, size * 0.1)
+  return `<div style="display:flex; align-items:center; gap:14px;">
+    <div style="display:flex; flex-direction:column; gap:3px; padding-right:14px; border-right:1px solid #222;">
+      ${BAR.map(c => `<div style="width:${dot}px; height:${dot}px; border-radius:50%; background:${c}; opacity:0.85;"></div>`).join('')}
+    </div>
+    <div>
+      <div style="margin-right:-0.28em;">
+        <span class="fd" style="font-weight:700; font-size:${size}px; letter-spacing:0.28em; color:#F0F0F0; line-height:1; display:block;">FRAME</span>
+      </div>
+      <div class="fd" style="font-weight:400; font-size:${Math.max(9, size*0.22)}px; letter-spacing:0.26em; color:#383838; text-transform:uppercase; margin-top:${size*0.1}px;">
+        Production Management
+      </div>
+    </div>
+  </div>`
+}
+document.getElementById('logo-hero').innerHTML = logo(64)
+document.getElementById('logo-mini').innerHTML = logo(14)
+document.getElementById('logo-footer').innerHTML = logo(20)
+
+// Section labels
+document.querySelectorAll('.slabel').forEach(el => {
+  const c = el.dataset.color
+  el.innerHTML = `<div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+    <div style="width:3px; height:13px; background:${c}; border-radius:1px;"></div>
+    <span class="fm" style="font-size:10px; color:#666; letter-spacing:0.16em; text-transform:uppercase;">${el.dataset.label}</span>
+  </div>`
+})
+
+// Hero tags
+const TAGS = [['Web Application', S.blue], ['Pre-Production', S.yellow], ['Shoot Day', S.green], ['Post-Production', S.cyan]]
+document.getElementById('hero-tags').innerHTML = TAGS.map(([label, color]) =>
+  `<span class="fm" style="display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:3px;
+    background:${color}18; border:1px solid ${color}35; font-size:10px; color:${color}; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap;">
+    <span style="width:4px; height:4px; border-radius:50%; background:${color};"></span>${label}</span>`).join('')
+
+// Hero stats
+const STATS = [['12','Modules'],['35+','Data types'],['3','Plan tiers'],['∞','Shot complexity']]
+document.getElementById('hero-stats').innerHTML = STATS.map(([n,l]) =>
+  `<div style="background:#0D0D0D; padding:22px 24px;">
+    <div class="fd" style="font-weight:700; font-size:34px; color:#E8E8E8; letter-spacing:0.02em; line-height:1; margin-bottom:8px;">${n}</div>
+    <div class="fm" style="font-size:10px; color:#555; letter-spacing:0.12em; text-transform:uppercase;">${l}</div>
+  </div>`).join('')
+
+// Mini UI preview
+document.getElementById('mini-tabs').innerHTML = ['Shot List','Script','Schedule','People'].map((t,i) =>
+  `<span class="fd" style="font-weight:600; font-size:9px; letter-spacing:0.1em; text-transform:uppercase;
+    color:${i===0?'#DDD':'#2E2E2E'}; border-bottom:1.5px solid ${i===0?S.cyan:'transparent'}; padding:4px 10px;">${t}</span>`).join('')
+document.getElementById('mini-head').innerHTML = ['Shot #','FS','Movement','Description','Lens','Status'].map(h =>
+  `<div class="fm" style="font-size:8px; color:#333; letter-spacing:0.1em; text-transform:uppercase;">${h}</div>`).join('')
+
+const SHOTS_PREVIEW = [
+  { id:'1A-01', fs:'WS',  mv:'Static',   desc:'Establishing. María alone at the rooftop edge, back to camera.',  status:'filmed',      statusC:S.green,  eq:'35mm' },
+  { id:'1A-03', fs:'MCU', mv:'Handheld', desc:'Carlos approaches. Two-shot resolving into OTS over María.',       status:'in progress', statusC:S.yellow, eq:'50mm' },
+  { id:'1B-01', fs:'ECU', mv:'Static',   desc:'Insert shot — phone screen glowing with unread notification.',      status:'not filmed',  statusC:S.blue,   eq:'100mm' },
+]
+document.getElementById('mini-rows').innerHTML = SHOTS_PREVIEW.map((row, i) =>
+  `<div style="display:grid; grid-template-columns:64px 40px 80px 1fr 80px 90px; gap:10px; padding:10px 16px;
+    ${i<2 ? 'border-bottom:1px solid #0E0E0E;' : ''} align-items:center;">
+    <span class="fm" style="font-size:11px; color:#AAA; letter-spacing:0.03em;">${row.id}</span>
+    <span class="fm" style="font-size:10px; color:${S.cyan}; background:${S.cyan}12; border:1px solid ${S.cyan}28; padding:1px 6px; border-radius:2px; justify-self:start;">${row.fs}</span>
+    <span class="fb" style="font-size:11px; color:#666;">${row.mv}</span>
+    <span class="fb" style="font-size:12px; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${row.desc}</span>
+    <span class="fm" style="font-size:10px; color:#444;">${row.eq}</span>
+    <span class="fd" style="display:inline-flex; align-items:center; gap:4px; font-weight:600; font-size:8px; letter-spacing:0.08em; text-transform:uppercase;
+      color:${row.statusC}; background:${row.statusC}14; border:1px solid ${row.statusC}30; padding:2px 8px; border-radius:2px; justify-self:start;">
+      <span style="width:4px; height:4px; border-radius:50%; background:${row.statusC};"></span>${row.status}</span>
+  </div>`).join('')
+
+// Problems
+const PROBLEMS = [
+  { icon:'folder-open',  color:S.yellow, title:'Production scattered across tools', desc:'Shot lists in spreadsheets. Call sheets in Word. Moodboards in Pinterest. References in WhatsApp. Nothing talks to anything.' },
+  { icon:'alert-circle', color:S.red,    title:'Changes break everything downstream', desc:"Update a location and three PDFs are outdated. Add a prop and no one knows which shots it's in. You find out on set." },
+  { icon:'clock',        color:S.cyan,   title:'Hours lost rebuilding the same documents', desc:'Every new project starts from zero. The same call sheet template, the same shot list columns, the same lost time.' },
+]
+document.getElementById('problems').innerHTML = PROBLEMS.map(p =>
+  `<div style="background:#0D0D0D; border:1px solid #1C1C1C; border-radius:6px; padding:24px 22px; border-top:2px solid ${p.color}40;">
+    <div style="width:36px; height:36px; border-radius:4px; background:${p.color}16; border:1px solid ${p.color}28;
+      display:flex; align-items:center; justify-content:center; margin-bottom:16px;">
+      <i data-lucide="${p.icon}" style="width:16px; height:16px; color:${p.color};"></i>
+    </div>
+    <div class="fd" style="font-weight:600; font-size:14px; color:#CCC; letter-spacing:0.01em; margin-bottom:10px; line-height:1.3;">${p.title}</div>
+    <p class="fb" style="font-size:13px; color:#777; line-height:1.65;">${p.desc}</p>
+  </div>`).join('')
+
+// Modules
+const MODULES = [
+  { icon:'film',      color:S.blue,    name:'Project',         desc:'One workspace for the whole production. Client, team, dates, and every deliverable — always in sync.' },
+  { icon:'file-text', color:S.white,   name:'Script',          desc:'Write your screenplay right where you plan your shots. Scene blocks link directly to your shot list.' },
+  { icon:'list',      color:S.blue,    name:'Shot List',       desc:"The most complete shot list you've used. Frame, lens, talent, props, emotions — all in one row." },
+  { icon:'users',     color:S.yellow,  name:'Persons',         desc:'Talent, crew, and clients — each with their profile, call time, and a personal task board.' },
+  { icon:'map-pin',   color:S.cyan,    name:'Locations',       desc:'Scout, pin, permit, and document every location with photos, coordinates, and access notes.' },
+  { icon:'layers',    color:S.magenta, name:'Styling',         desc:'One look per character per scene. Garments, accessories, hair, and makeup with visual references.' },
+  { icon:'package',   color:S.magenta, name:'Props',           desc:'From searching to on set and returned. Every prop tracked, with the scenes and shots it appears in.' },
+  { icon:'camera',    color:S.cyan,    name:'Equipment',       desc:'Cameras, lenses, and grip tracked by type, assignment, and rental source — nothing gets lost.' },
+  { icon:'calendar',  color:S.blue,    name:'Production Day',  desc:'Build your call sheet visually. Set call times per department, parallel activities, and catering.' },
+  { icon:'image',     color:S.magenta, name:'Moodboard',       desc:'Visual reference boards per project and per scene. Drag images, add swatches, pin ideas freely.' },
+  { icon:'sliders-horizontal', color:S.green, name:'Slate Generator', desc:'Auto-fills from your shot data. Export a print-ready PDF or a PNG overlay for post-production.' },
+  { icon:'download',  color:S.white,   name:'Exports',         desc:'Call sheets, shot lists, breakdowns, and production schedules. One click to a professional PDF.' },
+]
+document.getElementById('modules-grid').innerHTML = MODULES.map(mod =>
+  `<div style="background:#0A0A0A; padding:22px 20px; border-left:2px solid transparent;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+      <div style="width:32px; height:32px; border-radius:4px; background:${mod.color}18; border:1px solid ${mod.color}30;
+        display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <i data-lucide="${mod.icon}" style="width:14px; height:14px; color:${mod.color};"></i>
+      </div>
+      <span class="fd" style="font-weight:600; font-size:13px; color:#AAA; letter-spacing:0.04em;">${mod.name}</span>
+    </div>
+    <p class="fb" style="font-size:13px; color:#666; line-height:1.6;">${mod.desc}</p>
+  </div>`).join('')
+
+// Roles
+const ROLES = [
+  { role:'Director / Producer', color:S.white,   gets:['Full project overview at a glance','Shot list with visual references','Changelog to track every decision'] },
+  { role:'1st AD',              color:S.blue,    gets:['Day schedule with parallel blocks','Call times per person and department','One-click call sheet export'] },
+  { role:'Director of Photography', color:S.cyan, gets:['Camera data per shot: lens, movement, angle','Equipment inventory and assignments','Reference images attached to each shot'] },
+  { role:'Art / Stylist',       color:S.magenta, gets:['Look per character per scene','Props with full lifecycle tracking','Moodboards with visual reference pinboards'] },
+]
+document.getElementById('roles-grid').innerHTML = ROLES.map(r =>
+  `<div style="background:#0D0D0D; border:1px solid #1C1C1C; border-radius:6px; padding:22px;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+      <div style="width:5px; height:5px; border-radius:50%; background:${r.color};"></div>
+      <span class="fd" style="font-weight:600; font-size:13px; color:#CCC; letter-spacing:0.04em;">${r.role}</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      ${r.gets.map(g => `<div style="display:flex; align-items:flex-start; gap:10px;">
+        <i data-lucide="chevron-right" style="width:12px; height:12px; color:${r.color}; flex-shrink:0; margin-top:3px;"></i>
+        <span class="fb" style="font-size:13px; color:#777; line-height:1.5;">${g}</span>
+      </div>`).join('')}
+    </div>
+  </div>`).join('')
+
+// Tiers
+const TIERS = [
+  { name:'Free', color:S.white, price:'$0', period:'forever', badge:null,
+    desc:'For a single production.',
+    features:['1 active project','3 collaborators','500 MB storage','Call sheet + shot list PDF','Script editor','30-day changelog'] },
+  { name:'Pro', color:S.blue, price:'$24', period:'/month', badge:'Recommended',
+    desc:'For working professionals.',
+    features:['Unlimited projects','15 collaborators','10 GB storage','All export formats','Slate generator + PNG overlay','Full changelog history'] },
+  { name:'Team', color:S.cyan, price:'$69', period:'/month', badge:null,
+    desc:'For production companies.',
+    features:['Everything in Pro','Unlimited collaborators','50 GB storage','Granular permissions per module','Priority support','SSO (coming soon)'] },
+]
+document.getElementById('tiers').innerHTML = TIERS.map(tier =>
+  `<div style="position:relative; background:${tier.name==='Pro'?'#08111E':'#0D0D0D'};
+    border:1px solid ${tier.name==='Pro' ? tier.color+'55' : '#1C1C1C'}; border-radius:6px; padding:28px 24px;">
+    ${tier.badge ? `<div class="fm" style="position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+      background:${tier.color}; color:#090909; font-size:9px; font-weight:500; letter-spacing:0.1em; padding:3px 14px; border-radius:2px; white-space:nowrap;">${tier.badge}</div>` : ''}
+    <div style="display:flex; align-items:center; gap:7px; margin-bottom:16px;">
+      <div style="width:6px; height:6px; border-radius:50%; background:${tier.color};"></div>
+      <span class="fd" style="font-weight:700; font-size:13px; color:${tier.color}; letter-spacing:0.12em; text-transform:uppercase;">${tier.name}</span>
+    </div>
+    <div style="display:flex; align-items:baseline; gap:4px; margin-bottom:6px;">
+      <span class="fd" style="font-weight:700; font-size:38px; color:#E0E0E0; letter-spacing:0.01em; line-height:1;">${tier.price}</span>
+      <span class="fm" style="font-size:11px; color:#555;">${tier.period}</span>
+    </div>
+    <div class="fb" style="font-size:13px; color:#666; margin-bottom:20px;">${tier.desc}</div>
+    <div style="height:1px; background:#161616; margin-bottom:20px;"></div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      ${tier.features.map(f => `<div style="display:flex; align-items:flex-start; gap:9px;">
+        <i data-lucide="check" style="width:12px; height:12px; color:${tier.color}; flex-shrink:0; margin-top:2px;"></i>
+        <span class="fb" style="font-size:13px; color:#777; line-height:1.5;">${f}</span>
+      </div>`).join('')}
+    </div>
+  </div>`).join('')
+
+// Semantic swatches
+const SEMANTICS = [
+  [S.white,  'Approved',   'Confirmed'],
+  [S.yellow, 'In Progress','On Set'],
+  [S.cyan,   'Camera',     'Photography'],
+  [S.green,  'Filmed',     'Done'],
+  [S.magenta,'Styling',    'Art Dept'],
+  [S.red,    'Blocked',    'Urgent'],
+  [S.blue,   'Production', 'Scheduled'],
+]
+document.getElementById('semantics').innerHTML = SEMANTICS.map(([c,l1,l2]) =>
+  `<div style="background:${c}12; border:1px solid ${c}25; border-radius:4px; padding:12px 10px; text-align:center;">
+    <div style="width:16px; height:16px; border-radius:50%; background:${c}; margin:0 auto 10px;"></div>
+    <div class="fm" style="font-size:9px; color:${c}; letter-spacing:0.06em; line-height:1.6;">${l1}<br/>${l2}</div>
+  </div>`).join('')
+
+// Surfaces
+const SURFACES = [['#090909','bg-base','Page background'],['#131313','bg-surface','Cards, panels'],['#1C1C1C','bg-elevated','Dropdowns, modals'],['#252525','bg-overlay','Tooltips, popovers']]
+document.getElementById('surfaces').innerHTML = SURFACES.map(([hex,name,use]) =>
+  `<div style="display:flex; align-items:center; gap:12px;">
+    <div style="width:28px; height:28px; border-radius:3px; background:${hex}; border:1px solid #1E1E1E; flex-shrink:0;"></div>
+    <div>
+      <div class="fm" style="font-size:9px; color:#666;">${name}</div>
+      <div class="fb" style="font-size:11px; color:#444;">${use}</div>
+    </div>
+  </div>`).join('')
+
+lucide.createIcons()
+</script>
+</body>
+</html>
