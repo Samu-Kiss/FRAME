@@ -66,6 +66,11 @@ export const projectUpdateSchema = z.object({
   }),
 })
 
+export const scriptUpdateSchema = z.object({
+  projectId: z.string(),
+  content: z.record(z.string(), z.unknown()), // TipTap doc of screenplay blocks
+})
+
 export const memberAddSchema = z.object({
   projectId: z.string(),
   email: z.string().email(),

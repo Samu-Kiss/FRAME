@@ -41,3 +41,55 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
 }
+
+/* ── Screenplay editor (§4.3) — on-screen mirror of the print format ── */
+.screenplay .tiptap {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #d8d8d8;
+  min-height: 60vh;
+  outline: none;
+  max-width: 620px;
+  margin: 0 auto;
+}
+.screenplay .sp-block {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.screenplay .sp-sceneHeading {
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-top: 1.4em;
+}
+.screenplay .sp-action {
+  margin-top: 1.4em;
+}
+.screenplay .sp-character {
+  text-transform: uppercase;
+  margin-top: 1.4em;
+  margin-left: 38%;
+}
+.screenplay .sp-dialogue {
+  margin-left: 18%;
+  max-width: 62%;
+}
+.screenplay .sp-parenthetical {
+  margin-left: 28%;
+  max-width: 40%;
+  color: var(--color-muted);
+}
+.screenplay .sp-transition {
+  text-align: right;
+  text-transform: uppercase;
+  margin-top: 1.4em;
+  color: var(--color-muted);
+}
+.screenplay .sp-block.is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-faint);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
