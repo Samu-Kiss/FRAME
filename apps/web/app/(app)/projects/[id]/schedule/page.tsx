@@ -2,7 +2,7 @@
 
 import { use, useState } from "react"
 import Link from "next/link"
-import { Plus, Calendar, MapPin } from "lucide-react"
+import { Plus, Calendar, MapPin, Download } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { parseApiError } from "@/lib/errors"
 import {
@@ -26,6 +26,10 @@ export default function SchedulePage({ params }: { params: Promise<{ id: string 
     },
     onError: (e) => setError(parseApiError(e)),
   })
+  const requestExport = trpc.exports.request.useMutation({
+    onSuccess: (r) => window.open(r.url, "_blank"),
+    onError: (e) => setError(parseApiError(e)),
+  })
 
   if (days.isLoading) return <Spinner />
 
@@ -33,9 +37,20 @@ export default function SchedulePage({ params }: { params: Promise<{ id: string 
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-display text-lg font-bold uppercase tracking-[0.15em]">Production Days</h1>
-        <Button onClick={() => setOpen(true)}>
-          <span className="flex items-center gap-1.5"><Plus size={12} /> Day</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            disabled={requestExport.isPending}
+            onClick={() => requestExport.mutate({ projectId, type: "PRODUCTION_SCHEDULE", format: "pdf" })}
+          >
+            <span className="flex items-center gap-1.5">
+              <Download size={12} /> {requestExport.isPending ? "Generating…" : "Schedule PDF"}
+            </span>
+          </Button>
+          <Button onClick={() => setOpen(true)}>
+            <span className="flex items-center gap-1.5"><Plus size={12} /> Day</span>
+          </Button>
+        </div>
       </div>
 
       <ErrorNote message={error} />
