@@ -1,8 +1,9 @@
 "use client"
 
 import { use, useMemo, useState } from "react"
+import Link from "next/link"
 import {
-  Plus, Table2, LayoutGrid, ChevronDown, ChevronRight, Trash2, Download, Bookmark,
+  Plus, Table2, LayoutGrid, ChevronDown, ChevronRight, Trash2, Download, Bookmark, Clapperboard,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { parseApiError } from "@/lib/errors"
@@ -214,7 +215,7 @@ export default function ShotlistPage({ params }: { params: Promise<{ id: string 
 /* ── Scene section with shot rows / cards ─────────────────────── */
 
 function SceneBlock({
-  scene, view, onAddShot, onUpdateShot, onDeleteShot,
+  scene, view, projectId, onAddShot, onUpdateShot, onDeleteShot,
 }: {
   scene: Scene
   view: "table" | "cards"
@@ -261,6 +262,7 @@ function SceneBlock({
                 <ShotRow
                   key={shot.id}
                   shot={shot}
+                  projectId={projectId}
                   expanded={expanded === shot.id}
                   toggle={() => setExpanded(expanded === shot.id ? null : shot.id)}
                   onUpdate={(data) => onUpdateShot(shot.id, data)}
@@ -306,9 +308,10 @@ const inlineSelect =
   "cursor-pointer rounded-[2px] border border-transparent bg-transparent px-1 py-0.5 text-xs text-text hover:border-border focus:border-smpte-cyan/60 focus:outline-none"
 
 function ShotRow({
-  shot, expanded, toggle, onUpdate, onDelete,
+  shot, projectId, expanded, toggle, onUpdate, onDelete,
 }: {
   shot: Shot
+  projectId: string
   expanded: boolean
   toggle: () => void
   onUpdate: (data: Record<string, unknown>) => void
@@ -403,7 +406,15 @@ function ShotRow({
                 />
               </div>
               <div className="space-y-3">
-                <SectionLabel label="Production" color={SMPTE.yellow} />
+                <div className="flex items-center justify-between">
+                  <SectionLabel label="Production" color={SMPTE.yellow} />
+                  <Link
+                    href={`/projects/${projectId}/slate/${shot.id}`}
+                    className="font-mono flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-smpte-green hover:underline"
+                  >
+                    <Clapperboard size={11} /> Slate
+                  </Link>
+                </div>
                 <div className="flex flex-wrap items-center gap-4 text-xs">
                   <label className="flex items-center gap-2">
                     <span className="text-muted">Est. duration (s)</span>

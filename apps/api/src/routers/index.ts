@@ -7,6 +7,9 @@ import { tasksRouter } from "./tasks.js"
 import { locationsRouter } from "./locations.js"
 import { propsRouter } from "./props.js"
 import { stylingsRouter } from "./stylings.js"
+import { scriptRouter } from "./script.js"
+import { moodboardRouter } from "./moodboard.js"
+import { slateRouter } from "./slate.js"
 import { equipmentRouter } from "./equipment.js"
 import { productionDayRouter } from "./productionDay.js"
 import { changelogRouter } from "./changelog.js"
@@ -40,6 +43,9 @@ export const appRouter = router({
   locations: locationsRouter,
   props: propsRouter,
   stylings: stylingsRouter,
+  script: scriptRouter,
+  moodboard: moodboardRouter,
+  slate: slateRouter,
   equipment: equipmentRouter,
   productionDay: productionDayRouter,
   changelog: changelogRouter,
