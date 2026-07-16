@@ -1,0 +1,1049 @@
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FRAME — Production Management App                            ║
+// ║  Prisma Schema v1.0 (implements TECHNICAL DOC §3 with the     ║
+// ║  contradiction resolutions documented in the plan)            ║
+// ║  DB: PostgreSQL (Supabase local in dev, Supabase cloud prod)  ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ──────────────────────────────────────────────────────────────
+// ENUMS
+// ──────────────────────────────────────────────────────────────
+
+enum PlanTier {
+  FREE
+  PRO
+  TEAM
+}
+
+enum ProjectType {
+  COMMERCIAL
+  MUSIC_VIDEO
+  SHORT_FILM
+  FEATURE_FILM
+  DOCUMENTARY
+  CONTENT
+  OTHER
+}
+
+enum ProjectStatus {
+  DEVELOPMENT
+  PRE_PRODUCTION
+  PRODUCTION
+  POST_PRODUCTION
+  DELIVERED
+  ARCHIVED
+}
+
+enum Department {
+  DIRECTION
+  PRODUCTION
+  PHOTOGRAPHY
+  ART
+  MAKEUP_HAIR
+  WARDROBE
+  SOUND
+  POST
+  TALENT
+  CLIENT
+  OTHER
+}
+
+enum PersonType {
+  TALENT
+  CREW
+  POST_CREW
+  CLIENT
+}
+
+enum CrewType {
+  HEAD_OF_DEPARTMENT
+  OPERATOR
+  ASSISTANT
+}
+
+enum DaylightType {
+  DAWN
+  MORNING
+  MIDDAY
+  AFTERNOON
+  SUNSET
+  NIGHT
+  DEEP_NIGHT
+  STUDIO
+}
+
+enum FrameSize {
+  ECU
+  CU
+  MCU
+  MS
+  MLS
+  LS
+  ELS
+  AERIAL
+  POV
+  OTS
+  TWO_SHOT
+  INSERT
+  OTHER
+}
+
+enum CameraMovement {
+  STATIC
+  PAN
+  TILT
+  DOLLY
+  STEADICAM
+  HANDHELD
+  DRONE
+  CRANE
+  ZOOM
+  PUSH_IN
+  PULL_OUT
+  ARC
+  OTHER
+}
+
+enum CameraAngle {
+  EYE_LEVEL
+  HIGH_ANGLE
+  LOW_ANGLE
+  DUTCH
+  BIRDS_EYE
+  WORMS_EYE
+}
+
+// Shared by Scene and Shot (resolution #5)
+enum ShotStatus {
+  NOT_FILMED
+  IN_PROGRESS
+  FILMED
+  APPROVED
+  DISCARDED
+}
+
+enum LocationType {
+  INTERIOR
+  EXTERIOR
+  STUDIO
+  NATURAL
+  URBAN
+  RURAL
+  WATER
+  OTHER
+}
+
+enum PermitStatus {
+  NOT_REQUIRED
+  PENDING
+  IN_PROCESS
+  OBTAINED
+}
+
+enum PropCategory {
+  PROP
+  SET_DRESSING
+  VEHICLE
+  FOOD
+  WEAPON
+  DOCUMENT
+  TECH
+  OTHER
+}
+
+enum PropStatus {
+  SEARCHING
+  IN_FABRICATION
+  CONFIRMED
+  IN_STORAGE
+  ON_SET
+  RETURNED
+}
+
+enum PropSource {
+  OWN
+  RENTED
+  PURCHASED
+  BORROWED
+}
+
+enum StylingItemStatus {
+  SEARCHING
+  CONFIRMED
+  ON_LOAN
+  PURCHASED
+}
+
+enum EquipmentType {
+  CAMERA
+  LENS
+  STEADICAM
+  SLIDER
+  DRONE
+  LIGHTING
+  SOUND
+  GRIP
+  OTHER
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  BLOCKED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ChangeAction {
+  CREATED
+  UPDATED
+  DELETED
+  RESTORED
+}
+
+enum ScheduleBlockType {
+  SETUP
+  SHOOTING
+  CATERING
+  BREAK
+  WARDROBE_CHANGE
+  TRAVEL
+  PICKUP
+  WRAP
+  OTHER
+}
+
+// Resolution #7 — was a plain String in the draft schema
+enum ProductionDayStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  POSTPONED
+}
+
+enum MoodboardItemType {
+  IMAGE
+  VIDEO_REF
+  COLOR_SWATCH
+  TEXT_NOTE
+  URL_EMBED
+}
+
+enum ExportType {
+  CALL_SHEET
+  SHOT_LIST
+  PRODUCTION_SCHEDULE
+  SCENE_BREAKDOWN
+  SCRIPT
+  STRIPBOARD
+  TALENT_SCHEDULE
+  PROPS_LIST
+  EQUIPMENT_LIST
+  SLATE_PDF
+  SLATE_PNG
+}
+
+enum ExportJobStatus {
+  QUEUED
+  PROCESSING
+  DONE
+  FAILED
+}
+
+// ──────────────────────────────────────────────────────────────
+// USER
+// Auth handled by Supabase. User.id = Supabase auth.uid() (UUID).
+// ──────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id // UUID from Supabase Auth — no @default
+  email     String   @unique
+  name      String
+  avatarUrl String?
+  plan      PlanTier @default(FREE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedProjects  Project[]       @relation("ProjectOwner")
+  projectMembers ProjectMember[]
+  persons        Person[]
+  tasksCreated   Task[]          @relation("TaskCreatedBy")
+  changeEntries  ChangeEntry[]
+  exportJobs     ExportJob[]
+}
+
+// ──────────────────────────────────────────────────────────────
+// PROJECT
+// director / producer are derived from Person department+role
+// (resolution #2) — no direct FK on Project.
+// ──────────────────────────────────────────────────────────────
+
+model Project {
+  id             String        @id @default(cuid())
+  title          String
+  type           ProjectType
+  client         String?
+  brand          String?
+  description    Json?         // RichText (TipTap JSON)
+  status         ProjectStatus @default(DEVELOPMENT)
+  shootDates     Json?         // { start: ISO, end: ISO }[]
+  creationSource String        @default("blank") // "blank" | "demo_template" | "cloned_project"
+  clonedFromId   String?       // string ref — intentionally not a Prisma relation
+
+  ownerId String
+  owner   User   @relation("ProjectOwner", fields: [ownerId], references: [id])
+
+  members        ProjectMember[]
+  acts           Act[]
+  script         Script?
+  persons        Person[]
+  locations      Location[]
+  props          Prop[]
+  stylings       Styling[] // resolution #9
+  equipment      Equipment[]
+  productionDays ProductionDay[]
+  assets         Asset[]
+  moodboard      MoodboardBoard? @relation("ProjectMoodboard")
+  changeEntries  ChangeEntry[]
+  exportJobs     ExportJob[]
+  tasks          Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+// permissions JSON shape (PermissionSet):
+// { canEditScript, canEditShotlist, canEditCameraData, canEditSchedule,
+//   canEditPeople, canEditLocations, canEditStyling, canEditProps,
+//   canExport, canManageMembers, isAdmin }
+model ProjectMember {
+  id          String  @id @default(cuid())
+  projectId   String
+  userId      String
+  projectRole String
+  permissions Json
+  isAdmin     Boolean @default(false)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// SCRIPT
+// ──────────────────────────────────────────────────────────────
+
+model Script {
+  id        String @id @default(cuid())
+  projectId String @unique
+  content   Json   // TipTap JSON — blocks: SceneHeading, Action, Character, Dialogue, Parenthetical, Transition
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scenes  Scene[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────────────────────
+// STRUCTURE: PROJECT → ACT → SCENE → SHOT
+// ──────────────────────────────────────────────────────────────
+
+model Act {
+  id          String  @id @default(cuid())
+  projectId   String
+  number      Int
+  title       String?
+  description Json?
+  order       Int     @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scenes  Scene[]
+
+  @@unique([projectId, number])
+  @@index([projectId])
+}
+
+model Scene {
+  id                String       @id @default(cuid())
+  actId             String
+  projectId         String       // denormalized for filtering + changelog resolution
+  number            String       // "1A", "2B"
+  title             String
+  synopsis          Json?        // RichText
+  scriptRef         Json?        // { scriptId: string, blockId: string } | null
+  scriptId          String?
+  locationId        String?
+  daylight          DaylightType @default(MORNING)
+  estimatedDuration Int?         // minutes
+  status            ShotStatus   @default(NOT_FILMED)
+  notes             Json?        // RichText
+  order             Int          @default(0)
+
+  act      Act       @relation(fields: [actId], references: [id], onDelete: Cascade)
+  script   Script?   @relation(fields: [scriptId], references: [id])
+  location Location? @relation(fields: [locationId], references: [id])
+
+  shots      Shot[]
+  stylings   Styling[] // implicit m2m
+  sceneProps SceneProp[]
+  moodboard  MoodboardBoard? @relation("SceneMoodboard")
+
+  @@unique([actId, number])
+  @@index([actId])
+  @@index([projectId])
+  @@index([locationId])
+}
+
+// Shots inherit their location from the parent Scene (resolution #3)
+model Shot {
+  id          String  @id @default(cuid())
+  sceneId     String
+  projectId   String  // denormalized
+  shotNumber  String  // "1A-03"
+  shotName    String
+  description Json?   // RichText
+  order       Int     @default(0)
+
+  // Camera
+  frameSize       FrameSize?
+  lensSize        String?
+  cameraMovements CameraMovement[]
+  cameraAngle     CameraAngle?
+
+  // Audio / Post
+  voiceover    Json?
+  soundEffects String[]
+  musicRef     String?
+
+  // Production
+  estimatedDuration Int? // seconds
+  filmed            Boolean    @default(false)
+  takes             Int?
+  selectedTake      Int?
+  postNotes         Json?
+  notes             Json?
+  status            ShotStatus @default(NOT_FILMED)
+
+  // Slate config — shape:
+  // { enabled: boolean, layout: "standard"|"minimal"|"custom",
+  //   fields: [{ fieldKey, label, valueSource, autoRef?, manualValue? }] }
+  slateConfig Json?
+
+  scene Scene @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  people             ShotPerson[]
+  stylings           ShotStyling[]
+  props              ShotProp[]
+  equipment          ShotEquipment[]
+  assets             Asset[]
+  scheduleBlockShots ScheduleBlockShot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sceneId, shotNumber])
+  @@index([sceneId])
+  @@index([projectId])
+  @@index([filmed])
+  @@index([status])
+}
+
+// ──────────────────────────────────────────────────────────────
+// PERSON — Joined Table Inheritance
+// ──────────────────────────────────────────────────────────────
+
+model Person {
+  id         String     @id @default(cuid())
+  projectId  String
+  userId     String?    // optional — person has a login
+  name       String
+  email      String?
+  phone      String?
+  department Department
+  role       String
+  type       PersonType
+  callTime   String?    // "HH:MM" general call
+  notes      Json?      // RichText
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+
+  talent   Talent?
+  crew     Crew?
+  postCrew PostCrew?
+  client   ClientPerson?
+
+  shotPeople      ShotPerson[]
+  stylings        Styling[]
+  tasks           Task[]         @relation("TaskOwner")
+  taskAssignments TaskAssignee[]
+  crewCalls       CrewCall[]
+  talentCalls     TalentCall[]
+  assets          Asset[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([type])
+  @@index([department])
+  @@index([userId])
+}
+
+model Talent {
+  personId      String   @id
+  characterName String?
+  agencyName    String?
+  agencyContact String?
+  measurements  Json?    // { height, weight, sizes: Record<string, string> }
+  portfolio     String[]
+  availability  Json?    // { date: ISO, available: boolean }[]
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+}
+
+model Crew {
+  personId String   @id
+  crewType CrewType
+  vehicle  String?
+
+  person    Person            @relation(fields: [personId], references: [id], onDelete: Cascade)
+  equipment PersonEquipment[]
+}
+
+model PostCrew {
+  personId     String   @id
+  deliverables String[]
+  software     String[]
+  availability Json?    // { start: ISO, end: ISO }[]
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+}
+
+model ClientPerson {
+  personId         String  @id
+  companyName      String
+  position         String?
+  approvalRequired Boolean @default(false)
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+}
+
+// ──────────────────────────────────────────────────────────────
+// SHOT ↔ PERSON  (explicit junction — carries role/action/emotion)
+// ──────────────────────────────────────────────────────────────
+
+model ShotPerson {
+  id       String  @id @default(cuid())
+  shotId   String
+  personId String
+  role     String? // role in THIS shot (may differ from Person.role)
+  action   String?
+  emotion  String?
+
+  shot   Shot   @relation(fields: [shotId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([shotId, personId])
+  @@index([shotId])
+  @@index([personId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// LOCATION
+// ──────────────────────────────────────────────────────────────
+
+model Location {
+  id             String       @id @default(cuid())
+  projectId      String
+  name           String
+  type           LocationType
+  address        String?
+  coordinates    Json?        // { lat: number, lng: number }
+  contactName    String?
+  contactPhone   String?
+  permitRequired Boolean      @default(false)
+  permitStatus   PermitStatus @default(NOT_REQUIRED)
+  scoutingNotes  Json?        // RichText
+  accessNotes    Json?        // RichText
+  powerAvailable Boolean      @default(false)
+  amenities      String[]
+  availableDates Json?        // { start: ISO, end: ISO }[]
+
+  project                Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scenes                 Scene[]
+  assets                 Asset[]
+  productionDayLocations ProductionDayLocation[]
+  scheduleBlocks         ScheduleBlock[] // resolution #8
+  tasks                  Task[]
+
+  @@index([projectId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// STYLING
+// ──────────────────────────────────────────────────────────────
+
+model Styling {
+  id          String  @id @default(cuid())
+  projectId   String
+  characterId String  // Person.id — must be PersonType.TALENT
+  lookName    String
+  description Json?   // RichText
+  hairRef     Json?   // { description: Json, assetIds: string[] }
+  makeupRef   Json?   // { description: Json, assetIds: string[] }
+  notes       Json?   // RichText
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade) // resolution #9
+  character Person  @relation(fields: [characterId], references: [id], onDelete: Cascade) // a look is character-specific
+  scenes    Scene[] // implicit m2m
+
+  garments    Garment[]
+  accessories Accessory[]
+  assets      Asset[]
+  shots       ShotStyling[]
+
+  @@index([projectId])
+  @@index([characterId])
+}
+
+model Garment {
+  id        String            @id @default(cuid())
+  stylingId String
+  item      String
+  brand     String?
+  color     String
+  size      String?
+  status    StylingItemStatus @default(SEARCHING)
+  photoId   String?           // Asset.id — string ref, not Prisma FK (avoids circular)
+
+  styling Styling @relation(fields: [stylingId], references: [id], onDelete: Cascade)
+
+  @@index([stylingId])
+}
+
+model Accessory {
+  id        String            @id @default(cuid())
+  stylingId String
+  item      String
+  brand     String?
+  color     String
+  size      String?
+  status    StylingItemStatus @default(SEARCHING)
+  photoId   String?           // Asset.id — string ref
+
+  styling Styling @relation(fields: [stylingId], references: [id], onDelete: Cascade)
+
+  @@index([stylingId])
+}
+
+model ShotStyling {
+  shotId    String
+  stylingId String
+
+  shot    Shot    @relation(fields: [shotId], references: [id], onDelete: Cascade)
+  styling Styling @relation(fields: [stylingId], references: [id], onDelete: Cascade)
+
+  @@id([shotId, stylingId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// PROP
+// ──────────────────────────────────────────────────────────────
+
+model Prop {
+  id          String       @id @default(cuid())
+  projectId   String
+  name        String
+  description Json?        // RichText
+  category    PropCategory
+  quantity    Int          @default(1)
+  status      PropStatus   @default(SEARCHING)
+  source      PropSource?
+  sourceName  String?
+  cost        Float?
+  notes       Json?        // RichText
+
+  project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assets     Asset[]
+  sceneProps SceneProp[]
+  shotProps  ShotProp[]
+  tasks      Task[]
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model SceneProp {
+  sceneId String
+  propId  String
+
+  scene Scene @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+  prop  Prop  @relation(fields: [propId], references: [id], onDelete: Cascade)
+
+  @@id([sceneId, propId])
+}
+
+model ShotProp {
+  shotId String
+  propId String
+
+  shot Shot @relation(fields: [shotId], references: [id], onDelete: Cascade)
+  prop Prop @relation(fields: [propId], references: [id], onDelete: Cascade)
+
+  @@id([shotId, propId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// EQUIPMENT
+// Assignment to crew is m2m via PersonEquipment (resolution #10)
+// ──────────────────────────────────────────────────────────────
+
+model Equipment {
+  id             String        @id @default(cuid())
+  projectId      String
+  name           String
+  type           EquipmentType
+  brand          String?
+  model          String?
+  serialNumber   String?
+  rentalSource   String?
+  availableDates Json?         // { start: ISO, end: ISO }[]
+  notes          String?
+
+  project       Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo    PersonEquipment[]
+  shotEquipment ShotEquipment[]
+
+  @@index([projectId])
+  @@index([type])
+}
+
+model PersonEquipment {
+  crewId      String
+  equipmentId String
+
+  crew      Crew      @relation(fields: [crewId], references: [personId], onDelete: Cascade)
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@id([crewId, equipmentId])
+}
+
+model ShotEquipment {
+  shotId      String
+  equipmentId String
+
+  shot      Shot      @relation(fields: [shotId], references: [id], onDelete: Cascade)
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@id([shotId, equipmentId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// PRODUCTION DAY
+// ──────────────────────────────────────────────────────────────
+
+model ProductionDay {
+  id              String              @id @default(cuid())
+  projectId       String
+  date            DateTime            @db.Date
+  generalCallTime String              // "HH:MM"
+  generalNotes    Json?               // RichText
+  status          ProductionDayStatus @default(PLANNED) // resolution #7
+
+  project        Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  locations      ProductionDayLocation[]
+  scheduleBlocks ScheduleBlock[]
+  crewCalls      CrewCall[]
+  talentCalls    TalentCall[]
+
+  @@unique([projectId, date])
+  @@index([projectId])
+}
+
+model ProductionDayLocation {
+  productionDayId String
+  locationId      String
+
+  productionDay ProductionDay @relation(fields: [productionDayId], references: [id], onDelete: Cascade)
+  location      Location      @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@id([productionDayId, locationId])
+}
+
+model ScheduleBlock {
+  id              String            @id @default(cuid())
+  productionDayId String
+  startTime       String            // "HH:MM"
+  endTime         String            // "HH:MM"
+  type            ScheduleBlockType
+  label           String
+  parallel        Boolean           @default(false)
+  parallelGroupId String?           // groups simultaneous blocks for timeline rendering
+  locationId      String?           // override location for this block
+  notes           String?
+  order           Int               @default(0)
+
+  productionDay ProductionDay       @relation(fields: [productionDayId], references: [id], onDelete: Cascade)
+  location      Location?           @relation(fields: [locationId], references: [id]) // resolution #8
+  shots         ScheduleBlockShot[]
+
+  @@index([productionDayId])
+  @@index([parallelGroupId])
+}
+
+model ScheduleBlockShot {
+  scheduleBlockId String
+  shotId          String
+
+  scheduleBlock ScheduleBlock @relation(fields: [scheduleBlockId], references: [id], onDelete: Cascade)
+  shot          Shot          @relation(fields: [shotId], references: [id], onDelete: Cascade)
+
+  @@id([scheduleBlockId, shotId])
+}
+
+model CrewCall {
+  id              String      @id @default(cuid())
+  productionDayId String
+  personId        String?     // specific person OR...
+  department      Department? // ...whole department (one of these is set)
+  callTime        String      // "HH:MM"
+
+  productionDay ProductionDay @relation(fields: [productionDayId], references: [id], onDelete: Cascade)
+  person        Person?       @relation(fields: [personId], references: [id])
+
+  @@index([productionDayId])
+}
+
+model TalentCall {
+  id              String  @id @default(cuid())
+  productionDayId String
+  personId        String
+  callTime        String
+  makeupCallTime  String?
+  onSetTime       String?
+  wrapTime        String?
+
+  productionDay ProductionDay @relation(fields: [productionDayId], references: [id], onDelete: Cascade)
+  person        Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([productionDayId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// TASK
+// Owner and assignees are production Persons (resolution #4) —
+// a Person does not need a login to be assigned work. A task can
+// have MULTIPLE assignees via the TaskAssignee junction.
+// ──────────────────────────────────────────────────────────────
+
+model Task {
+  id          String       @id @default(cuid())
+  projectId   String
+  personId    String?      // owner Person — whose inbox this lives in
+  title       String
+  description Json?        // RichText
+  status      TaskStatus   @default(PENDING)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+
+  // Polymorphic context — display only (any entity type)
+  linkedEntityType String?
+  linkedEntityId   String?
+
+  // Direct FK shortcuts for most common task targets (Prisma-queryable)
+  propId     String?
+  locationId String?
+
+  createdById String
+
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  person    Person?   @relation("TaskOwner", fields: [personId], references: [id])
+  prop      Prop?     @relation(fields: [propId], references: [id])
+  location  Location? @relation(fields: [locationId], references: [id])
+  createdBy User      @relation("TaskCreatedBy", fields: [createdById], references: [id])
+
+  assignees TaskAssignee[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([personId])
+  @@index([status])
+  @@index([linkedEntityType, linkedEntityId])
+}
+
+model TaskAssignee {
+  taskId   String
+  personId String
+
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, personId])
+  @@index([personId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// MOODBOARD
+// ──────────────────────────────────────────────────────────────
+
+model MoodboardBoard {
+  id     String  @id @default(cuid())
+  title  String?
+  layout String  @default("freeform") // "freeform" | "grid"
+
+  projectId String? @unique
+  sceneId   String? @unique
+
+  project Project? @relation("ProjectMoodboard", fields: [projectId], references: [id], onDelete: Cascade)
+  scene   Scene?   @relation("SceneMoodboard", fields: [sceneId], references: [id], onDelete: Cascade)
+
+  items MoodboardItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MoodboardItem {
+  id      String            @id @default(cuid())
+  boardId String
+  type    MoodboardItemType
+  assetId String?
+  color   String?           // hex — for COLOR_SWATCH
+  content String?           // text or URL
+  caption String?
+  posX    Float             @default(0)
+  posY    Float             @default(0)
+  width   Float             @default(200)
+  height  Float             @default(200)
+  order   Int               @default(0)
+
+  board MoodboardBoard @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  asset Asset?         @relation(fields: [assetId], references: [id])
+
+  @@index([boardId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// ASSET
+// ──────────────────────────────────────────────────────────────
+
+model Asset {
+  id           String  @id @default(cuid())
+  projectId    String
+  filename     String
+  mimeType     String
+  size         Int     // bytes
+  storagePath  String  // path in Supabase Storage bucket
+  publicUrl    String
+  alt          String?
+  uploadedById String  // User.id
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Optional entity ownership — at most one is set
+  shotId     String?
+  personId   String?
+  locationId String?
+  stylingId  String?
+  propId     String?
+
+  shot     Shot?     @relation(fields: [shotId], references: [id])
+  person   Person?   @relation(fields: [personId], references: [id])
+  location Location? @relation(fields: [locationId], references: [id])
+  styling  Styling?  @relation(fields: [stylingId], references: [id])
+  prop     Prop?     @relation(fields: [propId], references: [id])
+
+  moodboardItems MoodboardItem[]
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@index([shotId])
+  @@index([personId])
+  @@index([locationId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// CHANGELOG
+// Auto-generated by the Prisma $extends client on every mutation.
+// diff: JSONPatch-like array — [{ op, path, value, oldValue }]
+// userId nullable (resolution #11): system/seed writes show "System"
+// ──────────────────────────────────────────────────────────────
+
+model ChangeEntry {
+  id           String       @id @default(cuid())
+  projectId    String
+  userId       String?
+  entityType   String       // Prisma model name: "Shot", "Prop", "Person"...
+  entityId     String
+  action       ChangeAction
+  diff         Json?        // [{ op: "replace", path: "/status", value: "FILMED", oldValue: "NOT_FILMED" }]
+  note         String?      // user comment on this change
+  namedVersion String?      // optional snapshot label
+
+  timestamp DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([projectId])
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([timestamp(sort: Desc)])
+}
+
+// ──────────────────────────────────────────────────────────────
+// EXPORT JOB
+// Core MVP renders synchronously but still records a row per export
+// (feeds the exportsPerDay plan limit). BullMQ worker slots in later.
+// ──────────────────────────────────────────────────────────────
+
+model ExportJob {
+  id          String          @id @default(cuid())
+  projectId   String
+  userId      String
+  type        ExportType
+  entityId    String?         // e.g. ProductionDay.id for CALL_SHEET
+  status      ExportJobStatus @default(QUEUED)
+  fileUrl     String?         // signed URL — TTL 1h (enforced at Storage level)
+  error       String?
+  createdAt   DateTime        @default(now())
+  completedAt DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([status])
+  @@index([userId, createdAt])
+}
