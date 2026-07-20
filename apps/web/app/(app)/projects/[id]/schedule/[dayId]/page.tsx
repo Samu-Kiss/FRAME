@@ -8,6 +8,7 @@ import { parseApiError } from "@/lib/errors"
 import {
   Button, Card, ErrorNote, Field, Input, Modal, MonoChip, SectionLabel, Select, Spinner, StatusBadge, Avatar,
 } from "@/components/ui"
+import { CommentThread } from "@/components/comments"
 import { BLOCK_STYLE, DAY_STATUS, SMPTE, enumLabel, toMins } from "@/lib/theme"
 import { fromRichText } from "@/lib/richtext"
 
@@ -213,6 +214,10 @@ export default function ProductionDayPage({ params }: { params: Promise<{ id: st
             </div>
           ) : null}
         </div>
+      </div>
+
+      <div className="mt-8 max-w-3xl">
+        <CommentThread projectId={projectId} entityType="ProductionDay" entityId={dayId} />
       </div>
 
       <NewBlockModal

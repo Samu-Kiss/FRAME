@@ -6,6 +6,7 @@ import { ArrowLeft, Plus } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { Avatar, Button, Card, ErrorNote, MonoChip, Select, Spinner } from "@/components/ui"
 import { TaskBoard, NewTaskModal } from "@/components/tasks"
+import { CommentThread } from "@/components/comments"
 import { DEPARTMENT_COLOR, TASK_PRIORITY, SMPTE, enumLabel } from "@/lib/theme"
 
 const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"]
@@ -82,6 +83,10 @@ export default function PersonPage({ params }: { params: Promise<{ id: string; p
       <ErrorNote message={error} />
 
       <TaskBoard projectId={projectId} tasks={filteredTasks} onError={setError} />
+
+      <div className="mt-8">
+        <CommentThread projectId={projectId} entityType="Person" entityId={personId} />
+      </div>
 
       <NewTaskModal
         projectId={projectId}

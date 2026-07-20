@@ -11,6 +11,7 @@ import {
   Button, EmptyState, ErrorNote, Field, Input, Modal, MonoChip, Select, Spinner,
   StatusBadge, Avatar, Textarea, SectionLabel,
 } from "@/components/ui"
+import { CommentThread } from "@/components/comments"
 import { SHOT_STATUS, SMPTE, enumLabel } from "@/lib/theme"
 import { toRichText, fromRichText } from "@/lib/richtext"
 
@@ -459,6 +460,9 @@ function ShotRow({
                   </div>
                 ) : null}
               </div>
+            </div>
+            <div className="mt-5 border-t border-border-dim pt-4">
+              <CommentThread projectId={projectId} entityType="Shot" entityId={shot.id} />
             </div>
           </td>
         </tr>
