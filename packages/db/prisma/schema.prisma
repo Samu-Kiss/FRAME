@@ -260,6 +260,17 @@ enum ExportType {
   SLATE_PNG
 }
 
+enum NotificationType {
+  MENTION
+  COMMENT
+  TASK_ASSIGNED
+}
+
+enum Language {
+  EN
+  ES
+}
+
 enum ExportJobStatus {
   QUEUED
   PROCESSING
@@ -278,6 +289,7 @@ model User {
   name      String
   avatarUrl String?
   plan      PlanTier @default(FREE)
+  language  Language @default(EN)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -287,6 +299,8 @@ model User {
   tasksCreated   Task[]          @relation("TaskCreatedBy")
   changeEntries  ChangeEntry[]
   exportJobs     ExportJob[]
+  comments       Comment[]
+  notifications  Notification[]  @relation("NotificationRecipient")
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -324,6 +338,8 @@ model Project {
   changeEntries  ChangeEntry[]
   exportJobs     ExportJob[]
   tasks          Task[]
+  comments       Comment[]
+  notifications  Notification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1046,4 +1062,54 @@ model ExportJob {
   @@index([userId])
   @@index([status])
   @@index([userId, createdAt])
+}
+
+// ──────────────────────────────────────────────────────────────
+// COMMENT — polymorphic thread on any entity (MVP+ §1.10)
+// entityType is a Prisma model name; entityId the row id.
+// ──────────────────────────────────────────────────────────────
+
+model Comment {
+  id         String  @id @default(cuid())
+  projectId  String
+  userId     String
+  entityType String  // "Shot" | "Task" | "Location" | "Prop" | "Styling" | "Scene" | "Person"...
+  entityId   String
+  body       String
+  mentions   String[] // User.id[] parsed from @mentions
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([entityType, entityId])
+  @@index([userId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// NOTIFICATION — per-user inbox (mentions, comments, assignments)
+// ──────────────────────────────────────────────────────────────
+
+model Notification {
+  id         String           @id @default(cuid())
+  projectId  String
+  userId     String           // recipient
+  actorName  String           // who triggered it (denormalized for display)
+  type       NotificationType
+  entityType String
+  entityId   String
+  message    String
+  read       Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([projectId])
+  @@index([createdAt(sort: Desc)])
 }
