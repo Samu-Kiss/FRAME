@@ -4,25 +4,27 @@ import { use } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  LayoutDashboard, List, Users, MapPin, Package, Camera, Calendar, History, Settings, Layers, FileText, Image as ImageIcon,
+  LayoutDashboard, List, Users, MapPin, Package, Camera, Calendar, History, Settings, Layers, FileText, Image as ImageIcon, Download,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { StatusBadge } from "@/components/ui"
+import { useI18n } from "@/lib/i18n"
 import { PROJECT_STATUS, SMPTE } from "@/lib/theme"
 
 const NAV = [
-  { href: "", label: "Dashboard", icon: LayoutDashboard, color: SMPTE.white },
-  { href: "/script", label: "Script", icon: FileText, color: SMPTE.white },
-  { href: "/shotlist", label: "Shotlist", icon: List, color: SMPTE.blue },
-  { href: "/moodboard", label: "Moodboard", icon: ImageIcon, color: SMPTE.magenta },
-  { href: "/people", label: "People & Tasks", icon: Users, color: SMPTE.yellow },
-  { href: "/locations", label: "Locations", icon: MapPin, color: SMPTE.cyan },
-  { href: "/props", label: "Props", icon: Package, color: SMPTE.magenta },
-  { href: "/stylings", label: "Styling", icon: Layers, color: SMPTE.magenta },
-  { href: "/equipment", label: "Equipment", icon: Camera, color: SMPTE.cyan },
-  { href: "/schedule", label: "Production Days", icon: Calendar, color: SMPTE.blue },
-  { href: "/changelog", label: "Changelog", icon: History, color: SMPTE.green },
-  { href: "/settings", label: "Team & Settings", icon: Settings, color: "#6B6B6B" },
+  { href: "", tkey: "nav.dashboard", icon: LayoutDashboard, color: SMPTE.white },
+  { href: "/script", tkey: "nav.script", icon: FileText, color: SMPTE.white },
+  { href: "/shotlist", tkey: "nav.shotlist", icon: List, color: SMPTE.blue },
+  { href: "/moodboard", tkey: "nav.moodboard", icon: ImageIcon, color: SMPTE.magenta },
+  { href: "/people", tkey: "nav.people", icon: Users, color: SMPTE.yellow },
+  { href: "/locations", tkey: "nav.locations", icon: MapPin, color: SMPTE.cyan },
+  { href: "/props", tkey: "nav.props", icon: Package, color: SMPTE.magenta },
+  { href: "/stylings", tkey: "nav.styling", icon: Layers, color: SMPTE.magenta },
+  { href: "/equipment", tkey: "nav.equipment", icon: Camera, color: SMPTE.cyan },
+  { href: "/schedule", tkey: "nav.schedule", icon: Calendar, color: SMPTE.blue },
+  { href: "/exports", tkey: "nav.exports", icon: Download, color: SMPTE.white },
+  { href: "/changelog", tkey: "nav.changelog", icon: History, color: SMPTE.green },
+  { href: "/settings", tkey: "nav.settings", icon: Settings, color: "#6B6B6B" },
 ]
 
 export default function ProjectLayout({
@@ -35,6 +37,7 @@ export default function ProjectLayout({
   const { id } = use(params)
   const pathname = usePathname()
   const project = trpc.project.get.useQuery({ projectId: id })
+  const { t } = useI18n()
   const base = `/projects/${id}`
 
   return (
@@ -61,7 +64,7 @@ export default function ProjectLayout({
                 }`}
               >
                 <item.icon size={13} style={{ color: active ? item.color : undefined }} />
-                {item.label}
+                {t(item.tkey)}
               </Link>
             )
           })}

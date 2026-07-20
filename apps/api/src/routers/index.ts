@@ -1,3 +1,4 @@
+import { z } from "zod"
 import { router, authedProcedure } from "../trpc.js"
 import { PLAN_LIMITS } from "../config/plans.js"
 import { projectRouter } from "./project.js"
@@ -10,6 +11,8 @@ import { stylingsRouter } from "./stylings.js"
 import { scriptRouter } from "./script.js"
 import { moodboardRouter } from "./moodboard.js"
 import { slateRouter } from "./slate.js"
+import { commentsRouter } from "./comments.js"
+import { notificationsRouter } from "./notifications.js"
 import { equipmentRouter } from "./equipment.js"
 import { productionDayRouter } from "./productionDay.js"
 import { changelogRouter } from "./changelog.js"
@@ -23,6 +26,7 @@ export const appRouter = router({
       email: ctx.dbUser.email,
       name: ctx.dbUser.name,
       plan: ctx.plan,
+      language: ctx.dbUser.language,
       limits: {
         // Infinity is not JSON-serializable through superjson? It is — but
         // send a plain shape the UI can render either way.
@@ -36,6 +40,12 @@ export const appRouter = router({
       },
     }
   }),
+  setLanguage: authedProcedure
+    .input(z.object({ language: z.enum(["EN", "ES"]) }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.user.update({ where: { id: ctx.dbUser.id }, data: { language: input.language } })
+      return { ok: true }
+    }),
   project: projectRouter,
   structure: structureRouter,
   persons: personsRouter,
@@ -46,6 +56,8 @@ export const appRouter = router({
   script: scriptRouter,
   moodboard: moodboardRouter,
   slate: slateRouter,
+  comments: commentsRouter,
+  notifications: notificationsRouter,
   equipment: equipmentRouter,
   productionDay: productionDayRouter,
   changelog: changelogRouter,

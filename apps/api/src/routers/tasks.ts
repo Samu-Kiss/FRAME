@@ -2,6 +2,31 @@ import { z } from "zod"
 import { taskCreateSchema, taskUpdateSchema, taskStatusSchema } from "@frame/validators"
 import { router, projectProcedure } from "../trpc.js"
 import { assertInProject } from "./structure.js"
+import { notify } from "../services/notify.js"
+import type { PrismaClientType } from "@frame/db"
+
+// Maps assigned production Persons to the User accounts that should be
+// notified (a Person without a login simply produces no notification).
+async function notifyAssignees(
+  prisma: PrismaClientType,
+  params: { projectId: string; personIds: string[]; taskId: string; taskTitle: string; actorId: string; actorName: string }
+) {
+  if (!params.personIds.length) return
+  const persons = await prisma.person.findMany({
+    where: { id: { in: params.personIds }, userId: { not: null } },
+    select: { userId: true },
+  })
+  await notify(prisma, {
+    projectId: params.projectId,
+    recipientIds: persons.map((p) => p.userId!).filter(Boolean),
+    actorId: params.actorId,
+    actorName: params.actorName,
+    type: "TASK_ASSIGNED",
+    entityType: "Task",
+    entityId: params.taskId,
+    message: `${params.actorName} assigned you a task: ${params.taskTitle}`,
+  })
+}
 
 // `as const` keeps the literal `true`s — otherwise Prisma's payload
 // inference degrades and the client-side types turn into `any`.
@@ -42,7 +67,7 @@ export const tasksRouter = router({
   create: projectProcedure.input(taskCreateSchema).mutation(async ({ ctx, input }) => {
     // the owner already sees the task on their board — don't double-list them
     const assigneeIds = input.assigneeIds?.filter((id) => id !== input.personId)
-    return ctx.prisma.task.create({
+    const task = await ctx.prisma.task.create({
       data: {
         projectId: input.projectId,
         personId: input.personId,
@@ -62,6 +87,15 @@ export const tasksRouter = router({
       },
       include: taskInclude,
     })
+    void notifyAssignees(ctx.prisma, {
+      projectId: input.projectId,
+      personIds: assigneeIds ?? [],
+      taskId: task.id,
+      taskTitle: task.title,
+      actorId: ctx.dbUser.id,
+      actorName: ctx.dbUser.name,
+    })
+    return task
   }),
 
   update: projectProcedure.input(taskUpdateSchema).mutation(async ({ ctx, input }) => {
@@ -78,12 +112,26 @@ export const tasksRouter = router({
     })
     if (input.assigneeIds) {
       const assigneeIds = input.assigneeIds.filter((id) => id !== task.personId)
+      const existing = await ctx.prisma.taskAssignee.findMany({
+        where: { taskId: input.taskId },
+        select: { personId: true },
+      })
+      const existingIds = new Set(existing.map((a) => a.personId))
       await ctx.prisma.taskAssignee.deleteMany({ where: { taskId: input.taskId } })
       if (assigneeIds.length) {
         await ctx.prisma.taskAssignee.createMany({
           data: assigneeIds.map((personId) => ({ taskId: input.taskId, personId })),
         })
       }
+      // notify only the newly added assignees
+      void notifyAssignees(ctx.prisma, {
+        projectId: input.projectId,
+        personIds: assigneeIds.filter((id) => !existingIds.has(id)),
+        taskId: task.id,
+        taskTitle: task.title,
+        actorId: ctx.dbUser.id,
+        actorName: ctx.dbUser.name,
+      })
     }
     return task
   }),

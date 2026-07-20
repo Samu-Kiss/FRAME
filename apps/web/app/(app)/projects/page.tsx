@@ -8,12 +8,14 @@ import { parseApiError } from "@/lib/errors"
 import {
   Button, Card, EmptyState, ErrorNote, Field, Input, Modal, Select, Spinner, StatusBadge, MonoChip,
 } from "@/components/ui"
+import { useI18n } from "@/lib/i18n"
 import { PROJECT_STATUS, SMPTE, enumLabel } from "@/lib/theme"
 
 const PROJECT_TYPES = ["COMMERCIAL", "MUSIC_VIDEO", "SHORT_FILM", "FEATURE_FILM", "DOCUMENTARY", "CONTENT", "OTHER"]
 
 export default function ProjectsPage() {
   const utils = trpc.useUtils()
+  const { t } = useI18n()
   const projects = trpc.project.list.useQuery()
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState("")
@@ -35,10 +37,10 @@ export default function ProjectsPage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-display text-lg font-bold uppercase tracking-[0.15em]">Projects</h1>
+        <h1 className="font-display text-lg font-bold uppercase tracking-[0.15em]">{t("common.projects")}</h1>
         <Button onClick={() => setOpen(true)}>
           <span className="flex items-center gap-2">
-            <Plus size={13} /> New project
+            <Plus size={13} /> {t("common.newProject")}
           </span>
         </Button>
       </div>

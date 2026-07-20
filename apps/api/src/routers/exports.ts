@@ -5,7 +5,9 @@ import { exportAllowed } from "../config/plans.js"
 import { uploadExport } from "../lib/storage.js"
 import {
   generateCallSheet, generateShotListPdf, generateShotListCsv, generateScriptPdf,
-  generateProductionSchedule,
+  generateProductionSchedule, generateSceneBreakdown, generateTalentSchedule,
+  generatePropsListPdf, generatePropsListCsv, generateEquipmentListPdf, generateEquipmentListCsv,
+  generateStripboard,
   type ExportFile,
 } from "../services/pdfExport.js"
 import { resolveSlate } from "../services/slate.js"
@@ -62,6 +64,30 @@ export const exportsRouter = router({
           }
           case "PRODUCTION_SCHEDULE": {
             file = await generateProductionSchedule(input.projectId)
+            break
+          }
+          case "SCENE_BREAKDOWN": {
+            file = await generateSceneBreakdown(input.projectId)
+            break
+          }
+          case "TALENT_SCHEDULE": {
+            file = await generateTalentSchedule(input.projectId)
+            break
+          }
+          case "PROPS_LIST": {
+            file = input.format === "csv"
+              ? await generatePropsListCsv(input.projectId)
+              : await generatePropsListPdf(input.projectId)
+            break
+          }
+          case "EQUIPMENT_LIST": {
+            file = input.format === "csv"
+              ? await generateEquipmentListCsv(input.projectId)
+              : await generateEquipmentListPdf(input.projectId)
+            break
+          }
+          case "STRIPBOARD": {
+            file = await generateStripboard(input.projectId)
             break
           }
           case "SLATE_PDF":
