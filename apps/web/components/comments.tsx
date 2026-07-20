@@ -5,6 +5,7 @@ import { MessageSquare, Trash2, Send } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { parseApiError } from "@/lib/errors"
 import { Avatar, Button, ErrorNote, SectionLabel } from "@/components/ui"
+import { useI18n } from "@/lib/i18n"
 import { SMPTE } from "@/lib/theme"
 
 type CommentableType =
@@ -32,6 +33,7 @@ export function CommentThread({
   entityId: string
 }) {
   const utils = trpc.useUtils()
+  const { t } = useI18n()
   const comments = trpc.comments.list.useQuery({ projectId, entityType, entityId })
   const project = trpc.project.get.useQuery({ projectId })
   const [body, setBody] = useState("")
@@ -54,12 +56,12 @@ export function CommentThread({
 
   return (
     <div>
-      <SectionLabel label={`Discussion · ${list.length}`} color={SMPTE.cyan} />
+      <SectionLabel label={`${t("comments.discussion")} · ${list.length}`} color={SMPTE.cyan} />
 
       <div className="space-y-3">
         {list.length === 0 ? (
           <p className="flex items-center gap-2 py-1 text-[11px] text-faint">
-            <MessageSquare size={12} /> No comments yet. Use @name to mention someone.
+            <MessageSquare size={12} /> {t("comments.empty")}
           </p>
         ) : (
           list.map((c) => (
@@ -101,7 +103,7 @@ export function CommentThread({
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Add a comment… @name to mention"
+          placeholder={t("comments.placeholder")}
           rows={2}
           className="min-h-10 flex-1 rounded-[3px] border border-border bg-surface-2 px-3 py-2 text-xs text-text placeholder:text-faint focus:border-smpte-cyan/60 focus:outline-none"
           onKeyDown={(e) => {

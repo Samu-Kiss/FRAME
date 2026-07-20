@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase"
 import { trpc } from "@/lib/trpc"
 import { SmpteBar, Logo, Spinner, MonoChip } from "@/components/ui"
 import { NotificationBell } from "@/components/notifications"
+import { useI18n } from "@/lib/i18n"
 import { SMPTE } from "@/lib/theme"
 
 const PLAN_COLOR: Record<string, string> = { FREE: "#6B6B6B", PRO: SMPTE.blue, TEAM: SMPTE.cyan }
@@ -32,9 +33,29 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return <Shell>{children}</Shell>
 }
 
+function LanguageToggle() {
+  const { lang, setLang } = useI18n()
+  return (
+    <div className="flex overflow-hidden rounded-[3px] border border-border">
+      {(["EN", "ES"] as const).map((l) => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          className={`font-mono cursor-pointer px-2 py-1 text-[10px] font-semibold tracking-wider ${
+            lang === l ? "bg-surface text-text" : "text-muted hover:text-text"
+          }`}
+        >
+          {l}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function Shell({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const me = trpc.me.useQuery()
+  const { t } = useI18n()
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -50,9 +71,10 @@ function Shell({ children }: { children: React.ReactNode }) {
               <span className="text-xs text-muted">{me.data.email}</span>
             </>
           ) : null}
+          <LanguageToggle />
           <NotificationBell />
           <button
-            title="Sign out"
+            title={t("common.signOut")}
             className="cursor-pointer text-muted transition-colors hover:text-text"
             onClick={async () => {
               await supabase().auth.signOut()
