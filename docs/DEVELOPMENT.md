@@ -93,9 +93,14 @@ The `SERVICE_ROLE_KEY` only ever lives in the API (§2.11 of the technical doc).
 
 ## Deferred (next iterations)
 
-Script editor (TipTap), Moodboards, Stylings UI, Slate generator, async export queue
-(BullMQ + Redis), Supabase Realtime feed, RLS policies, rate limiting. The seams for
-each are in place — see `apps/api/src/services/pdfExport.tsx` and §2.14 of the doc.
+Async export queue (BullMQ + Redis), Supabase Realtime feed, RLS policies, rate
+limiting, comments/notifications (MVP+). The seams are in place — see
+`apps/api/src/services/pdfExport.tsx` and §2.14 of the doc.
+
+> Slate PNG rendering needs a Chrome/Chromium binary (`CHROME_PATH` env var,
+> falls back to the default install paths). It runs in a child process —
+> puppeteer-core must never enter the API server's module graph, `tsx watch`
+> deadlocks on it.
 
 ## README images
 
