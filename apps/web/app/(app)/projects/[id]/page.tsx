@@ -4,6 +4,7 @@ import { use } from "react"
 import Link from "next/link"
 import { trpc } from "@/lib/trpc"
 import { Card, SectionLabel, Spinner, Avatar, MonoChip } from "@/components/ui"
+import { useI18n } from "@/lib/i18n"
 import { SMPTE, enumLabel } from "@/lib/theme"
 
 function Stat({ label, value, accent }: { label: string; value: string | number; accent: string }) {
@@ -27,6 +28,7 @@ const ACTION_COLOR: Record<string, string> = {
 export default function ProjectDashboard({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const dash = trpc.project.dashboard.useQuery({ projectId: id })
+  const { t } = useI18n()
 
   if (dash.isLoading || !dash.data) return <Spinner />
   const d = dash.data
@@ -37,21 +39,21 @@ export default function ProjectDashboard({ params }: { params: Promise<{ id: str
 
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="font-display mb-6 text-lg font-bold uppercase tracking-[0.15em]">Dashboard</h1>
+      <h1 className="font-display mb-6 text-lg font-bold uppercase tracking-[0.15em]">{t("nav.dashboard")}</h1>
 
       <div className="mb-8 flex flex-col gap-4 md:flex-row">
-        <Stat label="Shots filmed" value={`${pct}%`} accent={SMPTE.green} />
-        <Stat label="Total shots" value={d.totalShots} accent={SMPTE.blue} />
-        <Stat label="Scenes" value={d.scenes} accent={SMPTE.cyan} />
-        <Stat label="Open tasks" value={d.pendingTasks} accent={d.urgentTasks ? SMPTE.red : SMPTE.yellow} />
+        <Stat label={t("dash.shotsFilmed")} value={`${pct}%`} accent={SMPTE.green} />
+        <Stat label={t("dash.totalShots")} value={d.totalShots} accent={SMPTE.blue} />
+        <Stat label={t("dash.scenes")} value={d.scenes} accent={SMPTE.cyan} />
+        <Stat label={t("dash.openTasks")} value={d.pendingTasks} accent={d.urgentTasks ? SMPTE.red : SMPTE.yellow} />
         <Stat
-          label="Next shoot day"
+          label={t("dash.nextDay")}
           value={daysToNext === null ? "—" : daysToNext <= 0 ? "Today" : `${daysToNext}d`}
           accent={SMPTE.white}
         />
       </div>
 
-      <SectionLabel label="Recent activity" color={SMPTE.green} />
+      <SectionLabel label={t("dash.recentActivity")} color={SMPTE.green} />
       <Card>
         {d.recentChanges.length === 0 ? (
           <p className="py-6 text-center text-xs text-muted">No activity yet.</p>

@@ -1,3 +1,4 @@
+import { z } from "zod"
 import { router, authedProcedure } from "../trpc.js"
 import { PLAN_LIMITS } from "../config/plans.js"
 import { projectRouter } from "./project.js"
@@ -25,6 +26,7 @@ export const appRouter = router({
       email: ctx.dbUser.email,
       name: ctx.dbUser.name,
       plan: ctx.plan,
+      language: ctx.dbUser.language,
       limits: {
         // Infinity is not JSON-serializable through superjson? It is — but
         // send a plain shape the UI can render either way.
@@ -38,6 +40,12 @@ export const appRouter = router({
       },
     }
   }),
+  setLanguage: authedProcedure
+    .input(z.object({ language: z.enum(["EN", "ES"]) }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.user.update({ where: { id: ctx.dbUser.id }, data: { language: input.language } })
+      return { ok: true }
+    }),
   project: projectRouter,
   structure: structureRouter,
   persons: personsRouter,

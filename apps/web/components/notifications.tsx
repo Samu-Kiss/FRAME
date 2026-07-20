@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Bell, AtSign, MessageSquare, CheckSquare, Check } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { Avatar } from "@/components/ui"
+import { useI18n } from "@/lib/i18n"
 import { SMPTE } from "@/lib/theme"
 
 const TYPE_ICON = {
@@ -45,6 +46,7 @@ function hrefFor(n: { projectId: string; entityType: string; entityId: string })
 export function NotificationBell() {
   const router = useRouter()
   const utils = trpc.useUtils()
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   // light polling keeps the badge fresh without realtime infra (MVP+)
@@ -83,19 +85,19 @@ export function NotificationBell() {
       {open ? (
         <div className="absolute right-0 top-8 z-50 w-80 overflow-hidden rounded-md border border-border bg-surface shadow-2xl">
           <div className="flex items-center justify-between border-b border-border-dim px-4 py-2.5">
-            <span className="font-display text-[11px] font-bold uppercase tracking-[0.12em]">Notifications</span>
+            <span className="font-display text-[11px] font-bold uppercase tracking-[0.12em]">{t("common.notifications")}</span>
             {unread > 0 ? (
               <button
                 className="font-mono flex items-center gap-1 cursor-pointer text-[9px] uppercase tracking-wider text-muted hover:text-text"
                 onClick={() => markAll.mutate()}
               >
-                <Check size={10} /> Mark all read
+                <Check size={10} /> {t("common.markAllRead")}
               </button>
             ) : null}
           </div>
           <div className="max-h-96 overflow-y-auto">
             {items.length === 0 ? (
-              <p className="py-8 text-center text-[11px] text-faint">You&apos;re all caught up.</p>
+              <p className="py-8 text-center text-[11px] text-faint">{t("common.caughtUp")}</p>
             ) : (
               items.map((n) => {
                 const Icon = TYPE_ICON[n.type]
