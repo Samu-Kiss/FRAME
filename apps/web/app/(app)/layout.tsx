@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { trpc } from "@/lib/trpc"
 import { SmpteBar, Logo, Spinner, MonoChip } from "@/components/ui"
+import { NotificationBell } from "@/components/notifications"
 import { SMPTE } from "@/lib/theme"
 
 const PLAN_COLOR: Record<string, string> = { FREE: "#6B6B6B", PRO: SMPTE.blue, TEAM: SMPTE.cyan }
@@ -49,6 +50,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               <span className="text-xs text-muted">{me.data.email}</span>
             </>
           ) : null}
+          <NotificationBell />
           <button
             title="Sign out"
             className="cursor-pointer text-muted transition-colors hover:text-text"
