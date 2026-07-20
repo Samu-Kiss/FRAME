@@ -93,8 +93,10 @@ The `SERVICE_ROLE_KEY` only ever lives in the API (§2.11 of the technical doc).
 
 ## Deferred (next iterations)
 
-Async export queue (BullMQ + Redis), Supabase Realtime feed, RLS policies, rate
-limiting, comments/notifications (MVP+). The seams are in place — see
+Async export queue (BullMQ + Redis), Supabase Realtime feed (notifications
+currently poll every 30s), RLS policies, rate limiting, and the v2.0 items
+(real-time collaboration, map view, weather, budget tracker, project templates,
+AI script breakdown). The seams are in place — see
 `apps/api/src/services/pdfExport.tsx` and §2.14 of the doc.
 
 > Slate PNG rendering needs a Chrome/Chromium binary (`CHROME_PATH` env var,
