@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { StatusBadge } from "@/components/ui"
+import { PresenceBar } from "@/components/presence"
 import { useI18n } from "@/lib/i18n"
 import { PROJECT_STATUS, SMPTE } from "@/lib/theme"
 
@@ -48,8 +49,9 @@ export default function ProjectLayout({
           <p className="font-display truncate text-xs font-bold" title={project.data?.title}>
             {project.data?.title ?? "…"}
           </p>
-          <div className="mt-2">
+          <div className="mt-2 flex items-center justify-between gap-2">
             {project.data ? <StatusBadge status={PROJECT_STATUS[project.data.status]} /> : null}
+            <PresenceBar projectId={id} />
           </div>
         </div>
         <nav className="p-2">
