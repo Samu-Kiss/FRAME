@@ -271,6 +271,21 @@ enum Language {
   ES
 }
 
+enum BudgetCategory {
+  CAST
+  CREW
+  LOCATIONS
+  EQUIPMENT
+  ART_PROPS
+  WARDROBE_MAKEUP
+  TRANSPORT
+  CATERING
+  POST
+  INSURANCE
+  CONTINGENCY
+  OTHER
+}
+
 enum ExportJobStatus {
   QUEUED
   PROCESSING
@@ -340,6 +355,7 @@ model Project {
   tasks          Task[]
   comments       Comment[]
   notifications  Notification[]
+  budgetItems    BudgetItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1112,4 +1128,30 @@ model Notification {
   @@index([userId, read])
   @@index([projectId])
   @@index([createdAt(sort: Desc)])
+}
+
+// ──────────────────────────────────────────────────────────────
+// BUDGET ITEM — line-item budget tracker (v2.0 §1.10)
+// estimated vs actual per category; linkedEntity is display-only.
+// ──────────────────────────────────────────────────────────────
+
+model BudgetItem {
+  id          String         @id @default(cuid())
+  projectId   String
+  category    BudgetCategory
+  label       String
+  estimated   Float          @default(0)
+  actual      Float?
+  quantity    Float          @default(1)
+  unit        String? // "day", "flat", "unit"...
+  notes       String?
+  order       Int            @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([category])
 }

@@ -4,7 +4,7 @@ import { use } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  LayoutDashboard, List, Users, MapPin, Package, Camera, Calendar, History, Settings, Layers, FileText, Image as ImageIcon, Download,
+  LayoutDashboard, List, Users, MapPin, Package, Camera, Calendar, History, Settings, Layers, FileText, Image as ImageIcon, Download, DollarSign,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { StatusBadge } from "@/components/ui"
@@ -22,6 +22,7 @@ const NAV = [
   { href: "/stylings", tkey: "nav.styling", icon: Layers, color: SMPTE.magenta },
   { href: "/equipment", tkey: "nav.equipment", icon: Camera, color: SMPTE.cyan },
   { href: "/schedule", tkey: "nav.schedule", icon: Calendar, color: SMPTE.blue },
+  { href: "/budget", tkey: "nav.budget", icon: DollarSign, color: SMPTE.green },
   { href: "/exports", tkey: "nav.exports", icon: Download, color: SMPTE.white },
   { href: "/changelog", tkey: "nav.changelog", icon: History, color: SMPTE.green },
   { href: "/settings", tkey: "nav.settings", icon: Settings, color: "#6B6B6B" },
