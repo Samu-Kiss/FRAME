@@ -12,6 +12,45 @@ import { toRichText, fromRichText } from "@/lib/richtext"
 
 const LOCATION_TYPES = ["INTERIOR", "EXTERIOR", "STUDIO", "NATURAL", "URBAN", "RURAL", "WATER", "OTHER"]
 const PERMITS = ["NOT_REQUIRED", "PENDING", "IN_PROCESS", "OBTAINED"]
+// Outdoor location types get a weather forecast for the project's shoot days.
+const OUTDOOR_TYPES = new Set(["EXTERIOR", "NATURAL", "URBAN", "RURAL", "WATER"])
+
+// WMO weather code → icon (mirrors the API's weather service)
+const WMO_ICON: Record<number, string> = {
+  0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️",
+  51: "🌦️", 53: "🌦️", 55: "🌧️", 61: "🌦️", 63: "🌧️", 65: "🌧️",
+  71: "🌨️", 73: "❄️", 75: "❄️", 80: "🌦️", 81: "🌧️", 82: "⛈️",
+  95: "⛈️", 96: "⛈️", 99: "⛈️",
+}
+
+function WeatherBadge({ projectId, locationId }: { projectId: string; locationId: string }) {
+  const q = trpc.weather.forecast.useQuery(
+    { projectId, locationId },
+    { staleTime: 30 * 60_000, retry: false } // forecast is slow-moving; don't hammer open-meteo
+  )
+  const forecast = q.data?.forecast
+  if (!forecast?.length) return null
+  return (
+    <div className="mb-1 flex flex-wrap gap-1.5">
+      {forecast.map((f) => (
+        <span
+          key={f.date}
+          title={`${f.date} · precip ${f.precipitationProb ?? "—"}% · sunset ${f.sunset ? new Date(f.sunset).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "—"}`}
+          className="font-mono inline-flex items-center gap-1 rounded-[2px] border border-border-dim bg-surface-2 px-1.5 py-0.5 text-[10px] text-muted"
+        >
+          <span>{WMO_ICON[f.weatherCode] ?? "❓"}</span>
+          {new Date(f.date).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}
+          <span className="text-text">
+            {f.tempMax != null ? Math.round(f.tempMax) : "—"}°/{f.tempMin != null ? Math.round(f.tempMin) : "—"}°
+          </span>
+          {f.precipitationProb != null && f.precipitationProb >= 40 ? (
+            <span style={{ color: SMPTE.cyan }}>{f.precipitationProb}%</span>
+          ) : null}
+        </span>
+      ))}
+    </div>
+  )
+}
 
 export default function LocationsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = use(params)
@@ -96,7 +135,8 @@ export default function LocationsPage({ params }: { params: Promise<{ id: string
               {fromRichText(l.scoutingNotes) ? (
                 <p className="mb-2 text-[11px] leading-relaxed text-muted">{fromRichText(l.scoutingNotes)}</p>
               ) : null}
-              <div className="flex gap-3 text-[10px] text-faint">
+              {OUTDOOR_TYPES.has(l.type) ? <WeatherBadge projectId={projectId} locationId={l.id} /> : null}
+              <div className="mt-2 flex gap-3 text-[10px] text-faint">
                 <span>{l._count.scenes} scene{l._count.scenes === 1 ? "" : "s"}</span>
                 {l._count.tasks > 0 ? <span className="text-smpte-red">{l._count.tasks} open task{l._count.tasks === 1 ? "" : "s"}</span> : null}
                 {l.amenities.length ? <span>{l.amenities.join(" · ")}</span> : null}
