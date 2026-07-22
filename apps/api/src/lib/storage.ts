@@ -24,7 +24,9 @@ async function ensurePublicBucket() {
     await supabaseAdmin.storage.createBucket(PUBLIC_BUCKET, {
       public: true,
       fileSizeLimit: 20 * 1024 * 1024,
-      allowedMimeTypes: ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"],
+      // No image/svg+xml: SVGs served inline from a public bucket can
+      // execute embedded scripts (stored XSS). Raster formats only.
+      allowedMimeTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"],
     })
   }
   publicBucketReady = true

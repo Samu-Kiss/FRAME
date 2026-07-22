@@ -202,6 +202,13 @@ export const projectRouter = router({
   updateMember: requirePermission("canManageMembers")
     .input(memberUpdateSchema)
     .mutation(async ({ ctx, input }) => {
+      // Scope the target to this project — a manager of project A must not
+      // be able to mutate a member row of project B by guessing its id.
+      const target = await ctx.prisma.projectMember.findUnique({ where: { id: input.memberId } })
+      if (!target || target.projectId !== input.projectId) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "ENTITY_NOT_FOUND:member" })
+      }
+
       const permissions =
         input.permissions && !ctx.limits.granularPermissions
           ? input.permissions.isAdmin

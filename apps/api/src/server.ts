@@ -9,6 +9,15 @@ import { verifyToken } from "./lib/supabase.js"
 import { uploadPublicImage } from "./lib/storage.js"
 import { env } from "./env.js"
 
+// Raster image types only — kept in sync with the public bucket's
+// allowedMimeTypes (lib/storage.ts). SVG is intentionally absent.
+const UPLOAD_MIME_ALLOWLIST = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+])
+
 const app = new Hono()
 
 app.use(
@@ -37,7 +46,10 @@ app.post("/upload", async (c) => {
   if (typeof projectId !== "string" || !(file instanceof File)) {
     return c.json({ error: "BAD_REQUEST" }, 400)
   }
-  if (!file.type.startsWith("image/")) return c.json({ error: "IMAGES_ONLY" }, 400)
+  // Raster-only allowlist. SVG is deliberately excluded: it can carry
+  // <script>, and the public bucket serves files inline, so an SVG opened
+  // directly would execute JS in the storage origin (stored XSS).
+  if (!UPLOAD_MIME_ALLOWLIST.has(file.type)) return c.json({ error: "IMAGES_ONLY" }, 400)
 
   const membership = await prisma.projectMember.findUnique({
     where: { projectId_userId: { projectId, userId: user.id } },
