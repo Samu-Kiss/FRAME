@@ -1,12 +1,12 @@
 import { PrismaClient, Prisma } from "@prisma/client"
 import { computeDiff } from "./diff.js"
-import { getCurrentUserId } from "./context.js"
+import { getCurrentUserId, isChangelogSuppressed } from "./context.js"
 
 export * from "@prisma/client"
 export { Prisma }
 export { computeDiff } from "./diff.js"
 export type { DiffOp } from "./diff.js"
-export { requestContext, getCurrentUserId } from "./context.js"
+export { requestContext, getCurrentUserId, withoutChangelog } from "./context.js"
 export type { RequestContext } from "./context.js"
 
 // Models tracked by the global changelog (§4.2). Each resolves its
@@ -72,7 +72,7 @@ export const prisma = base.$extends({
   query: {
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
-        if (!WRITE_OPERATIONS.has(operation) || !CHANGELOG_MODELS.has(model)) {
+        if (!WRITE_OPERATIONS.has(operation) || !CHANGELOG_MODELS.has(model) || isChangelogSuppressed()) {
           return query(args)
         }
 
