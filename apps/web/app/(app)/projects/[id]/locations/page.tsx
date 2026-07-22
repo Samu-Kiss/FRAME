@@ -1,8 +1,15 @@
 "use client"
 
 import { use, useState } from "react"
-import { Plus, MapPin, Phone, Zap, Trash2 } from "lucide-react"
+import dynamic from "next/dynamic"
+import { Plus, MapPin, Phone, Zap, Trash2, List, Map as MapIcon } from "lucide-react"
 import { trpc } from "@/lib/trpc"
+
+// Leaflet touches `window` — load the map only on the client.
+const LocationMap = dynamic(() => import("@/components/LocationMap"), {
+  ssr: false,
+  loading: () => <div className="flex h-[480px] items-center justify-center rounded-md border border-border bg-surface-2 text-xs text-faint">Loading map…</div>,
+})
 import { parseApiError } from "@/lib/errors"
 import {
   Button, Card, EmptyState, ErrorNote, Field, Input, Modal, Select, Spinner, StatusBadge, Textarea, MonoChip,
@@ -57,6 +64,7 @@ export default function LocationsPage({ params }: { params: Promise<{ id: string
   const utils = trpc.useUtils()
   const locations = trpc.locations.list.useQuery({ projectId })
   const [open, setOpen] = useState(false)
+  const [view, setView] = useState<"list" | "map">("list")
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     name: "", type: "EXTERIOR", address: "", contactName: "", contactPhone: "",
@@ -78,14 +86,32 @@ export default function LocationsPage({ params }: { params: Promise<{ id: string
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-display text-lg font-bold uppercase tracking-[0.15em]">Locations</h1>
-        <Button onClick={() => setOpen(true)}>
-          <span className="flex items-center gap-1.5"><Plus size={12} /> Location</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex overflow-hidden rounded-[3px] border border-border">
+            <button
+              className={`flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${view === "list" ? "bg-surface text-text" : "text-muted"}`}
+              onClick={() => setView("list")}
+            >
+              <List size={12} /> List
+            </button>
+            <button
+              className={`flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${view === "map" ? "bg-surface text-text" : "text-muted"}`}
+              onClick={() => setView("map")}
+            >
+              <MapIcon size={12} /> Map
+            </button>
+          </div>
+          <Button onClick={() => setOpen(true)}>
+            <span className="flex items-center gap-1.5"><Plus size={12} /> Location</span>
+          </Button>
+        </div>
       </div>
 
       <ErrorNote message={error} />
 
-      {!locations.data?.length ? (
+      {view === "map" ? (
+        <LocationMap locations={(locations.data ?? []).map((l) => ({ id: l.id, name: l.name, type: l.type, permitStatus: l.permitStatus, coordinates: l.coordinates }))} />
+      ) : !locations.data?.length ? (
         <EmptyState title="No locations yet" hint="Scout, pin and document every location." />
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
