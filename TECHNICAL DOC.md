@@ -39,8 +39,9 @@ Contradicciones y vacíos detectados en la v0.2 al iniciar la implementación, c
 - *v0.1 (núcleo MVP):* monorepo Turborepo/pnpm, schema Prisma completo, API Hono+tRPC (auth Supabase, permisos, plan limits, changelog automático), UI de Dashboard/Shotlist/Personas+Tasks (multi-asignado)/Locaciones/Props/Equipment/Production Days/Changelog/Settings, exports Call Sheet PDF y Shot List PDF/CSV.
 - *v0.2 (MVP 1.0 completo):* guión TipTap con export PDF formato industria, Stylings UI, Moodboard (proyecto+escena, freeform/grid, upload de imágenes), Slate Generator (preview en vivo, PDF + PNG 1920×1080 vía Chrome headless), export de Production Schedule.
 - *v0.3 (MVP+ — Collaboration & Polish):* comentarios/threads polimórficos por entidad con @menciones, centro de notificaciones por usuario (menciones, respuestas, asignación de tasks), catálogo completo de exports (Scene Breakdown, Talent Schedule, Props/Equipment List PDF+CSV, Stripboard), e internacionalización EN+ES con persistencia por usuario.
+- *v0.4 (v2.0 — Scale & Intelligence, primer slice):* templates de proyecto (clonar proyecto propio + crear desde demo template, clon profundo del grafo completo), budget tracker (line items por categoría, estimado vs real, rollup y export CSV), colaboración en tiempo real vía Supabase Realtime (presencia en vivo por proyecto), e integración de clima para locaciones exteriores (open-meteo, sin key).
 
-**Diferido:** BullMQ+Redis (los exports son síncronos tras el seam de `pdfExport`), Supabase Realtime (las notificaciones usan polling de 30s), RLS, rate limiting, colaboración en tiempo real y demás items de v2.0.
+**Diferido:** BullMQ+Redis (los exports son síncronos tras el seam de `pdfExport`), feed DB-sync en vivo vía postgres_changes (requiere RLS; las notificaciones usan polling de 30s y la presencia usa broadcast), RLS, rate limiting, y los items restantes de v2.0 (vista de mapa, breakdown con IA desde PDF, PWA offline, app móvil nativa, tutorial interactivo).
 
 ---
 
