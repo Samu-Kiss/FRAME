@@ -1,14 +1,15 @@
 "use client"
 
-import { use } from "react"
+import { use, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  LayoutDashboard, List, Users, MapPin, Package, Camera, Calendar, History, Settings, Layers, FileText, Image as ImageIcon, Download, DollarSign,
+  LayoutDashboard, List, Users, MapPin, Package, Camera, Calendar, History, Settings, Layers, FileText, Image as ImageIcon, Download, DollarSign, HelpCircle,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { StatusBadge } from "@/components/ui"
 import { PresenceBar } from "@/components/presence"
+import { Tour, useTour, hasSeenTour } from "@/components/tour"
 import { useI18n } from "@/lib/i18n"
 import { PROJECT_STATUS, SMPTE } from "@/lib/theme"
 
@@ -40,15 +41,30 @@ export default function ProjectLayout({
   const pathname = usePathname()
   const project = trpc.project.get.useQuery({ projectId: id })
   const { t } = useI18n()
+  const tour = useTour()
   const base = `/projects/${id}`
+
+  // First visit to a project → auto-launch the guided tour once.
+  useEffect(() => {
+    if (project.data && !hasSeenTour()) tour.start()
+  }, [project.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex min-h-full">
       <aside className="w-56 shrink-0 border-r border-border-dim bg-bg-deep">
         <div className="border-b border-border-dim px-4 py-4">
-          <p className="font-display truncate text-xs font-bold" title={project.data?.title}>
-            {project.data?.title ?? "…"}
-          </p>
+          <div className="flex items-start justify-between gap-2">
+            <p className="font-display truncate text-xs font-bold" title={project.data?.title}>
+              {project.data?.title ?? "…"}
+            </p>
+            <button
+              className="shrink-0 cursor-pointer text-faint hover:text-text"
+              title="Take the tour"
+              onClick={tour.start}
+            >
+              <HelpCircle size={13} />
+            </button>
+          </div>
           <div className="mt-2 flex items-center justify-between gap-2">
             {project.data ? <StatusBadge status={PROJECT_STATUS[project.data.status]} /> : null}
             <PresenceBar projectId={id} />
@@ -62,6 +78,7 @@ export default function ProjectLayout({
               <Link
                 key={item.href}
                 href={href}
+                data-tour={item.tkey.replace(".", "-")}
                 className={`mb-0.5 flex items-center gap-2.5 rounded-[3px] px-3 py-2 text-xs transition-colors ${
                   active ? "bg-surface text-text" : "text-muted hover:bg-surface-2 hover:text-text"
                 }`}
@@ -74,6 +91,7 @@ export default function ProjectLayout({
         </nav>
       </aside>
       <section className="min-w-0 flex-1 px-8 py-7">{children}</section>
+      <Tour active={tour.active} onClose={tour.stop} />
     </div>
   )
 }
