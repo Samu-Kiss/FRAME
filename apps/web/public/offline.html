@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRAME — Offline</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0D0D0D; color: #F0F0F0; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 24px;
+  }
+  .bar { display: flex; width: 220px; height: 5px; margin-bottom: 40px; }
+  .bar div { flex: 1; }
+  h1 { font-size: 44px; letter-spacing: 0.28em; margin-right: -0.28em; font-weight: 800; }
+  .sub { font-size: 10px; letter-spacing: 0.28em; color: #4A4A4A; text-transform: uppercase; margin-top: 6px; }
+  p { color: #8A8A8A; font-size: 14px; margin-top: 28px; max-width: 360px; line-height: 1.6; }
+  button {
+    margin-top: 28px; cursor: pointer; background: #F0F0F0; color: #0D0D0D; border: none;
+    border-radius: 3px; padding: 10px 22px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <div style="background:#F0F0F0"></div><div style="background:#EFC000"></div>
+    <div style="background:#00D4DE"></div><div style="background:#00C853"></div>
+    <div style="background:#CC00AA"></div><div style="background:#FF3530"></div>
+    <div style="background:#2860FF"></div>
+  </div>
+  <h1>FRAME</h1>
+  <div class="sub">Production Management</div>
+  <p>You're offline. FRAME needs a connection to load your production data. Check your network and try again.</p>
+  <button onclick="location.reload()">Retry</button>
+</body>
+</html>
