@@ -17,6 +17,7 @@ import { equipmentRouter } from "./equipment.js"
 import { productionDayRouter } from "./productionDay.js"
 import { changelogRouter } from "./changelog.js"
 import { exportsRouter } from "./exports.js"
+import { budgetRouter } from "./budget.js"
 
 export const appRouter = router({
   me: authedProcedure.query(({ ctx }) => {
@@ -62,6 +63,7 @@ export const appRouter = router({
   productionDay: productionDayRouter,
   changelog: changelogRouter,
   exports: exportsRouter,
+  budget: budgetRouter,
 })
 
 export type AppRouter = typeof appRouter

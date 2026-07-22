@@ -20,6 +20,7 @@ const DICT: Record<string, { EN: string; ES: string }> = {
   "nav.styling": { EN: "Styling", ES: "Vestuario" },
   "nav.equipment": { EN: "Equipment", ES: "Equipo" },
   "nav.schedule": { EN: "Production Days", ES: "Días de Rodaje" },
+  "nav.budget": { EN: "Budget", ES: "Presupuesto" },
   "nav.exports": { EN: "Exports", ES: "Exportaciones" },
   "nav.changelog": { EN: "Changelog", ES: "Historial" },
   "nav.settings": { EN: "Team & Settings", ES: "Equipo y Ajustes" },

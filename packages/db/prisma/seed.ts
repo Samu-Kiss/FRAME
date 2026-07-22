@@ -487,8 +487,25 @@ async function main() {
     },
   })
 
+  // ── Budget lines (v2.0) ──────────────────────────────────────
+  await prisma.budgetItem.createMany({
+    data: [
+      { projectId: pid, category: "CREW", label: "Director day rate", estimated: 1200, actual: 1200, quantity: 3, unit: "day", order: 0 },
+      { projectId: pid, category: "CREW", label: "DP day rate", estimated: 900, actual: 950, quantity: 3, unit: "day", order: 1 },
+      { projectId: pid, category: "CREW", label: "Gaffer + grip", estimated: 700, quantity: 3, unit: "day", order: 2 },
+      { projectId: pid, category: "CAST", label: "Lead talent (María)", estimated: 2500, actual: 2500, quantity: 1, unit: "flat", order: 0 },
+      { projectId: pid, category: "CAST", label: "Supporting (Carlos)", estimated: 900, quantity: 1, unit: "flat", order: 1 },
+      { projectId: pid, category: "EQUIPMENT", label: "ARRI Alexa LF package", estimated: 1500, actual: 1500, quantity: 3, unit: "day", order: 0 },
+      { projectId: pid, category: "EQUIPMENT", label: "DJI Inspire 3 + pilot", estimated: 1100, quantity: 1, unit: "day", order: 1 },
+      { projectId: pid, category: "LOCATIONS", label: "Rooftop permit + fee", estimated: 1800, actual: 2100, quantity: 1, unit: "flat", order: 0 },
+      { projectId: pid, category: "CATERING", label: "Crew meals", estimated: 45, actual: 52, quantity: 30, unit: "person/day", order: 0 },
+      { projectId: pid, category: "POST", label: "Editorial + grade", estimated: 6000, quantity: 1, unit: "flat", order: 0 },
+      { projectId: pid, category: "CONTINGENCY", label: "10% contingency", estimated: 3000, quantity: 1, unit: "flat", order: 0 },
+    ],
+  })
+
   console.log(`Seeded demo project "${project.title}" (${pid})`)
-  console.log(`  3 scenes, 5 shots, ${10} people, 3 locations, 3 props, 6 equipment, 1 production day, 6 tasks`)
+  console.log(`  3 scenes, 5 shots, ${10} people, 3 locations, 3 props, 6 equipment, 1 production day, 6 tasks, 11 budget lines`)
 }
 
 main()
