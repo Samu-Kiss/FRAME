@@ -93,11 +93,15 @@ The `SERVICE_ROLE_KEY` only ever lives in the API (§2.11 of the technical doc).
 
 ## Deferred (next iterations)
 
-Async export queue (BullMQ + Redis), Supabase Realtime feed (notifications
-currently poll every 30s), RLS policies, rate limiting, and the v2.0 items
-(real-time collaboration, map view, weather, budget tracker, project templates,
-AI script breakdown). The seams are in place — see
-`apps/api/src/services/pdfExport.tsx` and §2.14 of the doc.
+Async export queue (BullMQ + Redis), live DB-sync feed via `postgres_changes`
+(needs RLS — presence uses broadcast, notifications poll every 30s), RLS
+policies, rate limiting, and the remaining v2.0 items (map view, AI script
+breakdown from PDF, offline PWA, native mobile app, interactive tutorial). The
+seams are in place — see `apps/api/src/services/pdfExport.tsx` and §2.14 of the doc.
+
+> Weather uses [open-meteo](https://open-meteo.com) — free and keyless. The
+> forecast only reaches ~16 days ahead, so it appears only for near-term shoot
+> days; any failure degrades to no badge.
 
 > Slate PNG rendering needs a Chrome/Chromium binary (`CHROME_PATH` env var,
 > falls back to the default install paths). It runs in a child process —

@@ -4,10 +4,11 @@ import { use } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  LayoutDashboard, List, Users, MapPin, Package, Camera, Calendar, History, Settings, Layers, FileText, Image as ImageIcon, Download,
+  LayoutDashboard, List, Users, MapPin, Package, Camera, Calendar, History, Settings, Layers, FileText, Image as ImageIcon, Download, DollarSign,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { StatusBadge } from "@/components/ui"
+import { PresenceBar } from "@/components/presence"
 import { useI18n } from "@/lib/i18n"
 import { PROJECT_STATUS, SMPTE } from "@/lib/theme"
 
@@ -22,6 +23,7 @@ const NAV = [
   { href: "/stylings", tkey: "nav.styling", icon: Layers, color: SMPTE.magenta },
   { href: "/equipment", tkey: "nav.equipment", icon: Camera, color: SMPTE.cyan },
   { href: "/schedule", tkey: "nav.schedule", icon: Calendar, color: SMPTE.blue },
+  { href: "/budget", tkey: "nav.budget", icon: DollarSign, color: SMPTE.green },
   { href: "/exports", tkey: "nav.exports", icon: Download, color: SMPTE.white },
   { href: "/changelog", tkey: "nav.changelog", icon: History, color: SMPTE.green },
   { href: "/settings", tkey: "nav.settings", icon: Settings, color: "#6B6B6B" },
@@ -47,8 +49,9 @@ export default function ProjectLayout({
           <p className="font-display truncate text-xs font-bold" title={project.data?.title}>
             {project.data?.title ?? "…"}
           </p>
-          <div className="mt-2">
+          <div className="mt-2 flex items-center justify-between gap-2">
             {project.data ? <StatusBadge status={PROJECT_STATUS[project.data.status]} /> : null}
+            <PresenceBar projectId={id} />
           </div>
         </div>
         <nav className="p-2">

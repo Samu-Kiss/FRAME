@@ -59,6 +59,13 @@ export const projectCreateSchema = z.object({
 })
 export type ProjectCreateInput = z.infer<typeof projectCreateSchema>
 
+// v2.0: create blank, clone an own project, or copy the demo template (§1.10)
+export const projectCreateFromTemplateSchema = z.object({
+  title: z.string().min(1).max(200),
+  source: z.enum(["clone", "demo"]),
+  sourceProjectId: z.string(), // own project to clone, or the demo template id
+})
+
 export const projectUpdateSchema = z.object({
   projectId: z.string(),
   data: projectCreateSchema.partial().extend({

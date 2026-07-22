@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Plus, Users, Calendar, Film } from "lucide-react"
 import { trpc } from "@/lib/trpc"
 import { parseApiError } from "@/lib/errors"
@@ -22,17 +23,26 @@ export default function ProjectsPage() {
   const [type, setType] = useState("COMMERCIAL")
   const [client, setClient] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const [source, setSource] = useState<"blank" | "demo" | "clone">("blank")
+  const [cloneId, setCloneId] = useState("")
+  const router = useRouter()
+  const templates = trpc.project.listTemplates.useQuery(undefined, { enabled: open })
 
-  const create = trpc.project.create.useMutation({
-    onSuccess: () => {
-      utils.project.list.invalidate()
-      setOpen(false)
-      setTitle("")
-      setClient("")
-      setError(null)
-    },
+  const onCreated = () => {
+    utils.project.list.invalidate()
+    setOpen(false)
+    setTitle("")
+    setClient("")
+    setSource("blank")
+    setCloneId("")
+    setError(null)
+  }
+  const create = trpc.project.create.useMutation({ onSuccess: onCreated, onError: (e) => setError(parseApiError(e)) })
+  const createFromTemplate = trpc.project.createFromTemplate.useMutation({
+    onSuccess: (r) => { onCreated(); router.push(`/projects/${r.id}`) },
     onError: (e) => setError(parseApiError(e)),
   })
+  const busy = create.isPending || createFromTemplate.isPending
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
@@ -90,26 +100,75 @@ export default function ProjectsPage() {
         <form
           onSubmit={(e) => {
             e.preventDefault()
-            create.mutate({ title, type: type as never, client: client || undefined })
+            if (source === "blank") {
+              create.mutate({ title, type: type as never, client: client || undefined })
+            } else {
+              const sourceProjectId = source === "demo" ? templates.data?.demo?.id : cloneId
+              if (!sourceProjectId) { setError("Select a project to copy from."); return }
+              createFromTemplate.mutate({ title, source, sourceProjectId })
+            }
           }}
           className="space-y-4"
         >
+          {/* Source picker (§1.10 v2.0) */}
+          <Field label="Start from">
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { key: "blank", label: "Blank", desc: "Empty project" },
+                { key: "demo", label: "Demo", desc: "Explore a sample" },
+                { key: "clone", label: "Clone", desc: "Copy your own" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setSource(opt.key)}
+                  className={`rounded-[3px] border px-3 py-2.5 text-left transition-colors ${
+                    source === opt.key ? "border-smpte-cyan/60 bg-smpte-cyan/10" : "border-border hover:border-muted"
+                  }`}
+                >
+                  <div className="font-display text-[11px] font-semibold uppercase tracking-wider">{opt.label}</div>
+                  <div className="mt-0.5 text-[9px] text-muted">{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+          </Field>
+
           <Field label="Title">
             <Input value={title} onChange={(e) => setTitle(e.target.value)} required autoFocus placeholder="Production title" />
           </Field>
-          <Field label="Type">
-            <Select value={type} onChange={(e) => setType(e.target.value)}>
-              {PROJECT_TYPES.map((t) => (
-                <option key={t} value={t}>{enumLabel(t)}</option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Client (optional)">
-            <Input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client name" />
-          </Field>
+
+          {source === "blank" ? (
+            <>
+              <Field label="Type">
+                <Select value={type} onChange={(e) => setType(e.target.value)}>
+                  {PROJECT_TYPES.map((t) => (
+                    <option key={t} value={t}>{enumLabel(t)}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Client (optional)">
+                <Input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client name" />
+              </Field>
+            </>
+          ) : source === "demo" ? (
+            <p className="rounded-[3px] border border-border-dim bg-surface-2 px-3 py-2 text-[11px] text-muted">
+              Copies the demo production{templates.data?.demo ? ` "${templates.data.demo.title}"` : ""} — a fully populated
+              example with scenes, shots, people, locations and a shoot day to explore.
+            </p>
+          ) : (
+            <Field label="Project to clone">
+              <Select value={cloneId} onChange={(e) => setCloneId(e.target.value)} required>
+                <option value="">Select one of your projects…</option>
+                {(templates.data?.own ?? []).map((p) => (
+                  <option key={p.id} value={p.id}>{p.title} · {p._count.acts} acts · {p._count.persons} people</option>
+                ))}
+              </Select>
+            </Field>
+          )}
+
           <ErrorNote message={error} />
-          <Button type="submit" disabled={create.isPending} className="w-full">
-            {create.isPending ? "Creating…" : "Create project"}
+          <Button type="submit" disabled={busy} className="w-full">
+            {busy ? "Creating…" : source === "blank" ? "Create project" : "Copy project"}
           </Button>
         </form>
       </Modal>

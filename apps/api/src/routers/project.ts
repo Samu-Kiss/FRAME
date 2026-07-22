@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 import {
-  projectCreateSchema, projectUpdateSchema, memberAddSchema, memberUpdateSchema,
+  projectCreateSchema, projectCreateFromTemplateSchema, projectUpdateSchema, memberAddSchema, memberUpdateSchema,
   FULL_PERMISSIONS, type PermissionSet,
 } from "@frame/validators"
 import { router, authedProcedure, projectProcedure, adminProcedure, requirePermission } from "../trpc.js"
+import { cloneProject } from "../services/cloneProject.js"
 
 // Non-Team plans don't get granular permissions (§2.13): members are
 // either admins or standard collaborators (edit everything, no admin).
@@ -72,6 +73,23 @@ export const projectRouter = router({
     return { totalShots, filmedShots, pendingTasks, urgentTasks, scenes, recentChanges, nextDay }
   }),
 
+  // Own non-archived projects (clonable) + the global demo template (§1.10)
+  listTemplates: authedProcedure.query(async ({ ctx }) => {
+    const [own, demo] = await Promise.all([
+      ctx.prisma.project.findMany({
+        where: { ownerId: ctx.dbUser.id, status: { not: "ARCHIVED" } },
+        select: { id: true, title: true, type: true, _count: { select: { acts: true, persons: true } } },
+        orderBy: { updatedAt: "desc" },
+      }),
+      ctx.prisma.project.findFirst({
+        where: { creationSource: "demo_template" },
+        select: { id: true, title: true, type: true },
+        orderBy: { createdAt: "asc" },
+      }),
+    ])
+    return { own, demo }
+  }),
+
   create: authedProcedure.input(projectCreateSchema).mutation(async ({ ctx, input }) => {
     const activeCount = await ctx.prisma.project.count({
       where: { ownerId: ctx.dbUser.id, status: { not: "ARCHIVED" } },
@@ -99,6 +117,39 @@ export const projectRouter = router({
       },
     })
   }),
+
+  createFromTemplate: authedProcedure
+    .input(projectCreateFromTemplateSchema)
+    .mutation(async ({ ctx, input }) => {
+      const activeCount = await ctx.prisma.project.count({
+        where: { ownerId: ctx.dbUser.id, status: { not: "ARCHIVED" } },
+      })
+      if (activeCount >= ctx.limits.maxActiveProjects) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "PLAN_LIMIT_EXCEEDED:active_projects" })
+      }
+
+      const source = await ctx.prisma.project.findUnique({
+        where: { id: input.sourceProjectId },
+        select: { id: true, ownerId: true, creationSource: true, members: { where: { userId: ctx.dbUser.id }, select: { id: true } } },
+      })
+      if (!source) throw new TRPCError({ code: "NOT_FOUND", message: "ENTITY_NOT_FOUND:project" })
+
+      // Clone: must be a member of the source. Demo: must actually be the demo template.
+      if (input.source === "clone" && source.members.length === 0) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "NOT_A_MEMBER" })
+      }
+      if (input.source === "demo" && source.creationSource !== "demo_template") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "NOT_A_DEMO_TEMPLATE" })
+      }
+
+      return cloneProject({
+        sourceProjectId: input.sourceProjectId,
+        ownerId: ctx.dbUser.id,
+        ownerName: ctx.dbUser.name,
+        newTitle: input.title,
+        creationSource: input.source === "demo" ? "demo_template" : "cloned_project",
+      })
+    }),
 
   update: adminProcedure.input(projectUpdateSchema).mutation(async ({ ctx, input }) => {
     return ctx.prisma.project.update({
