@@ -91,17 +91,24 @@ Same code, cloud env vars:
 
 The `SERVICE_ROLE_KEY` only ever lives in the API (§2.11 of the technical doc).
 
-## Deferred (next iterations)
+## Deferred (future work)
 
-Async export queue (BullMQ + Redis), live DB-sync feed via `postgres_changes`
+The MVP 1.0, MVP+ and v2.0 roadmaps are complete. Still open as future work:
+async export queue (BullMQ + Redis), live DB-sync feed via `postgres_changes`
 (needs RLS — presence uses broadcast, notifications poll every 30s), RLS
-policies, rate limiting, and the remaining v2.0 items (map view, AI script
-breakdown from PDF, offline PWA, native mobile app, interactive tutorial). The
-seams are in place — see `apps/api/src/services/pdfExport.tsx` and §2.14 of the doc.
+policies, rate limiting, an LLM-backed script breakdown (the current one is a
+deterministic parser), and a **native mobile app** — a separate React
+Native/Expo product against the same tRPC API, out of scope for this web
+monorepo (the PWA covers installable mobile use meanwhile). The seams are in
+place — see `apps/api/src/services/pdfExport.tsx` and §2.14 of the doc.
 
 > Weather uses [open-meteo](https://open-meteo.com) — free and keyless. The
 > forecast only reaches ~16 days ahead, so it appears only for near-term shoot
 > days; any failure degrades to no badge.
+
+> The location map uses Leaflet + OpenStreetMap tiles (loaded client-side).
+> PWA icons live in `apps/web/public/icons`; regenerate the SW cache name
+> (`frame-shell-vN` in `public/sw.js`) when the shell changes.
 
 > Slate PNG rendering needs a Chrome/Chromium binary (`CHROME_PATH` env var,
 > falls back to the default install paths). It runs in a child process —
