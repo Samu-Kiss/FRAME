@@ -1,16 +1,16 @@
 "use client"
 
 import { use, useEffect, useRef, useState } from "react"
-import { Download } from "lucide-react"
+import { Download, Wand2 } from "lucide-react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import Document from "@tiptap/extension-document"
 import Text from "@tiptap/extension-text"
 import History from "@tiptap/extension-history"
 import { trpc } from "@/lib/trpc"
 import { parseApiError } from "@/lib/errors"
-import { Button, ErrorNote, Spinner } from "@/components/ui"
+import { Button, Card, ErrorNote, Modal, MonoChip, SectionLabel, Spinner } from "@/components/ui"
 import { ScreenplayBlock, SCREENPLAY_TYPES, SCREENPLAY_LABEL, type ScreenplayType } from "@/lib/screenplay"
-import { SMPTE } from "@/lib/theme"
+import { SMPTE, enumLabel } from "@/lib/theme"
 
 const ScriptDoc = Document.extend({ content: "screenplayBlock+" })
 
@@ -33,6 +33,7 @@ function ScriptEditor({
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState<"saved" | "saving" | "dirty">("saved")
   const [activeType, setActiveType] = useState<ScreenplayType>("sceneHeading")
+  const [breakdownOpen, setBreakdownOpen] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const update = trpc.script.update.useMutation({
@@ -77,16 +78,23 @@ function ScriptEditor({
             {saved === "saved" ? "Saved" : saved === "saving" ? "Saving…" : "Unsaved"}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          disabled={requestExport.isPending}
-          onClick={() => requestExport.mutate({ projectId, type: "SCRIPT", format: "pdf" })}
-        >
-          <span className="flex items-center gap-1.5">
-            <Download size={12} /> {requestExport.isPending ? "Generating…" : "Script PDF"}
-          </span>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={() => setBreakdownOpen(true)}>
+            <span className="flex items-center gap-1.5"><Wand2 size={12} /> Auto-breakdown</span>
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={requestExport.isPending}
+            onClick={() => requestExport.mutate({ projectId, type: "SCRIPT", format: "pdf" })}
+          >
+            <span className="flex items-center gap-1.5">
+              <Download size={12} /> {requestExport.isPending ? "Generating…" : "Script PDF"}
+            </span>
+          </Button>
+        </div>
       </div>
+
+      <BreakdownModal projectId={projectId} open={breakdownOpen} onClose={() => setBreakdownOpen(false)} />
 
       {/* Block type toolbar — Tab cycles, Ctrl+1..6 jumps */}
       <div className="mb-4 flex flex-wrap gap-1.5">
@@ -118,5 +126,105 @@ function ScriptEditor({
         <EditorContent editor={editor} />
       </div>
     </div>
+  )
+}
+
+/* ── Auto-breakdown: parse the script into draft scenes + characters ── */
+
+function BreakdownModal({ projectId, open, onClose }: { projectId: string; open: boolean; onClose: () => void }) {
+  const utils = trpc.useUtils()
+  const preview = trpc.breakdown.preview.useQuery({ projectId }, { enabled: open })
+  const [error, setError] = useState<string | null>(null)
+  const [createScenes, setCreateScenes] = useState(true)
+  const [createCharacters, setCreateCharacters] = useState(true)
+  const [done, setDone] = useState<{ scenesCreated: number; charactersCreated: number } | null>(null)
+
+  const apply = trpc.breakdown.applyBreakdown.useMutation({
+    onSuccess: (r) => {
+      setDone(r)
+      utils.structure.tree.invalidate({ projectId })
+      utils.persons.list.invalidate({ projectId })
+    },
+    onError: (e) => setError(parseApiError(e)),
+  })
+
+  const scenes = preview.data?.scenes ?? []
+  const characters = preview.data?.characters ?? []
+  const newScenes = scenes.filter((s) => !s.exists).length
+  const newChars = characters.filter((c) => !c.exists).length
+
+  return (
+    <Modal title="Auto-breakdown" open={open} onClose={onClose} wide>
+      {preview.isLoading ? (
+        <Spinner />
+      ) : done ? (
+        <div className="space-y-4 text-center">
+          <p className="font-display text-sm font-bold" style={{ color: SMPTE.green }}>
+            Created {done.scenesCreated} scene{done.scenesCreated === 1 ? "" : "s"} and {done.charactersCreated} character{done.charactersCreated === 1 ? "" : "s"}.
+          </p>
+          <p className="text-[11px] text-muted">Find them in the Shotlist and People modules to refine.</p>
+          <Button onClick={onClose} className="w-full">Done</Button>
+        </div>
+      ) : scenes.length === 0 && characters.length === 0 ? (
+        <p className="py-6 text-center text-xs text-muted">
+          No scene headings found. Write scene headings like <span className="font-mono text-smpte-cyan">INT. ROOFTOP - NIGHT</span> in the script, then run this again.
+        </p>
+      ) : (
+        <div className="space-y-5">
+          <p className="text-[11px] text-muted">
+            Parsed from your screenplay — scene headings (INT./EXT.), characters and time-of-day. Rule-based, deterministic; nothing is created until you apply.
+          </p>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <SectionLabel label={`Scenes · ${scenes.length} (${newScenes} new)`} color={SMPTE.blue} />
+              <div className="max-h-52 space-y-1 overflow-y-auto">
+                {scenes.map((s, i) => (
+                  <Card key={i} className="!p-2.5">
+                    <div className="flex items-center gap-2">
+                      {s.intExt ? <MonoChip color={SMPTE.cyan}>{s.intExt}</MonoChip> : null}
+                      <span className="font-display text-[11px] font-semibold">{s.location}</span>
+                      <MonoChip color="#6B6B6B">{enumLabel(s.daylight)}</MonoChip>
+                      {s.exists ? <span className="font-mono ml-auto text-[9px] text-faint">exists</span> : <span className="font-mono ml-auto text-[9px] text-smpte-green">new</span>}
+                    </div>
+                    {s.characters.length ? (
+                      <p className="mt-1 text-[10px] text-muted">{s.characters.join(", ")}</p>
+                    ) : null}
+                  </Card>
+                ))}
+              </div>
+            </div>
+            <div>
+              <SectionLabel label={`Characters · ${characters.length} (${newChars} new)`} color={SMPTE.yellow} />
+              <div className="flex max-h-52 flex-wrap gap-1.5 overflow-y-auto">
+                {characters.map((c) => (
+                  <MonoChip key={c.name} color={c.exists ? "#6B6B6B" : SMPTE.yellow}>{c.name}</MonoChip>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2 border-t border-border-dim pt-3">
+            <label className="flex items-center gap-2 text-xs text-muted">
+              <input type="checkbox" checked={createScenes} onChange={(e) => setCreateScenes(e.target.checked)} />
+              Create {newScenes} new scene{newScenes === 1 ? "" : "s"}
+            </label>
+            <label className="flex items-center gap-2 text-xs text-muted">
+              <input type="checkbox" checked={createCharacters} onChange={(e) => setCreateCharacters(e.target.checked)} />
+              Create {newChars} new character{newChars === 1 ? "" : "s"} as talent
+            </label>
+          </div>
+
+          <ErrorNote message={error} />
+          <Button
+            className="w-full"
+            disabled={apply.isPending || (!createScenes && !createCharacters)}
+            onClick={() => apply.mutate({ projectId, createScenes, createCharacters })}
+          >
+            {apply.isPending ? "Applying…" : "Apply breakdown"}
+          </Button>
+        </div>
+      )}
+    </Modal>
   )
 }
